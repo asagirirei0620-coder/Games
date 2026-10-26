@@ -3,260 +3,150 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>Horde Survivor - Animation Edition</title>
+<title>HORDES OF DESTINY</title>
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050713;color:#fff;font-family:Arial,"Noto Sans JP",sans-serif}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#05070d;color:#fff;font-family:Arial,"Noto Sans JP",sans-serif}
 body{user-select:none}
-canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+canvas{display:block;position:absolute;inset:0}
 #ui{position:absolute;inset:0;pointer-events:none}
 #top{
  position:absolute;left:18px;right:18px;top:14px;
- display:flex;gap:12px;align-items:center
+ display:flex;align-items:center;gap:12px
 }
-.bar{
- height:22px;background:rgba(10,14,30,.82);
- border:2px solid rgba(255,255,255,.18);
- border-radius:12px;overflow:hidden;position:relative;
- box-shadow:0 4px 15px #0008
+#levelBox{
+ width:150px;padding:7px 10px;background:rgba(8,12,24,.82);
+ border:1px solid rgba(255,255,255,.12);border-radius:10px;
+ font-weight:bold;font-size:14px
 }
-#hpBox{width:230px}
-#expBox{flex:1}
-#hpFill{height:100%;background:linear-gradient(90deg,#ff315c,#ff7b54);width:100%}
-#expFill{height:100%;background:linear-gradient(90deg,#38d9ff,#8a6cff,#ff4fd8);width:0%}
-.barText{
- position:absolute;inset:0;text-align:center;font-size:12px;line-height:18px;
- text-shadow:0 2px 3px #000;font-weight:bold
-}
-#stats{
- position:absolute;top:45px;left:20px;
- font-size:13px;color:#d9e7ff;text-shadow:0 2px 4px #000;
- line-height:1.6
-}
+.bar{height:9px;background:#151a2a;border-radius:8px;overflow:hidden;margin-top:5px}
+#expFill{height:100%;width:0;background:linear-gradient(90deg,#45eaff,#8d6bff);transition:.1s}
+#hpWrap{width:260px}
+#hpFill{height:100%;width:100%;background:linear-gradient(90deg,#ff365c,#ff7a5c)}
 #time{
- position:absolute;top:18px;right:20px;
- font-size:22px;font-weight:bold;text-shadow:0 2px 5px #000
-}
-#level{
- position:absolute;top:48px;right:20px;
- font-size:14px;color:#9beaff
+ margin-left:auto;font-size:23px;font-weight:900;
+ text-shadow:0 0 12px #fff
 }
 #combo{
- position:absolute;right:25px;top:78px;
- text-align:right;font-weight:bold
+ position:absolute;left:24px;top:100px;font-weight:900;
+ font-size:25px;color:#ffe66d;text-shadow:0 0 14px #ff9d00
 }
-#comboNum{font-size:30px;color:#fff;text-shadow:0 0 12px #7df}
-#comboLabel{font-size:11px;color:#9bb0c8}
-#weaponUI{
+#combo small{font-size:12px;color:#fff}
+#stats{
+ position:absolute;right:18px;top:70px;text-align:right;
+ font-size:13px;color:#c8d1e8;line-height:1.55
+}
+#slots{
  position:absolute;left:18px;bottom:18px;
- display:flex;gap:7px;flex-wrap:wrap;width:370px
+ display:flex;gap:7px;flex-direction:column
 }
+.slotRow{display:flex;gap:5px}
 .slot{
- width:58px;height:58px;border:2px solid #34415e;border-radius:10px;
- background:rgba(8,12,27,.88);position:relative;
- box-shadow:0 4px 12px #0008
+ width:48px;height:48px;border-radius:9px;
+ background:rgba(9,13,27,.9);border:1px solid #29324b;
+ display:flex;align-items:center;justify-content:center;
+ position:relative;font-size:22px
 }
-.slot.active{border-color:#69e9ff;box-shadow:0 0 15px #29dfff55}
-.slot .icon{font-size:25px;text-align:center;margin-top:4px}
-.slot .name{font-size:8px;text-align:center;color:#b9c8df;white-space:nowrap;overflow:hidden}
-.slot .lv{
- position:absolute;right:3px;top:2px;background:#ffd34d;color:#16120a;
- border-radius:5px;padding:1px 3px;font-size:9px;font-weight:bold
+.slot b{position:absolute;right:3px;bottom:2px;font-size:9px;color:#fff}
+.slot em{position:absolute;left:3px;top:2px;font-style:normal;font-size:8px;color:#aeb9d5}
+#message{
+ position:absolute;left:50%;top:39%;transform:translate(-50%,-50%);
+ text-align:center;font-weight:1000;font-size:55px;
+ text-shadow:0 0 25px currentColor,0 0 60px currentColor;
+ opacity:0;pointer-events:none;white-space:nowrap
 }
-#passiveUI{
- position:absolute;right:18px;bottom:18px;
- display:flex;gap:6px;flex-wrap:wrap;width:290px;justify-content:flex-end
+#message.show{animation:msg .8s ease forwards}
+@keyframes msg{
+ 0%{opacity:0;transform:translate(-50%,-50%) scale(.5)}
+ 20%{opacity:1;transform:translate(-50%,-50%) scale(1.15)}
+ 75%{opacity:1;transform:translate(-50%,-50%) scale(1)}
+ 100%{opacity:0;transform:translate(-50%,-50%) scale(1.08)}
 }
-.pSlot{
- width:45px;height:45px;border:1px solid #394762;border-radius:8px;
- background:#090e1d;position:relative;text-align:center
-}
-.pSlot .pIcon{font-size:19px;margin-top:3px}
-.pSlot .pLv{font-size:8px;color:#aabbd4}
-#announce{
- position:absolute;left:50%;top:42%;
- transform:translate(-50%,-50%) scale(.7);
- font-size:48px;font-weight:900;letter-spacing:4px;
- text-align:center;opacity:0;
- text-shadow:0 0 20px #fff,0 4px 15px #000;
- transition:.18s;
- white-space:nowrap
-}
-#announce.show{opacity:1;transform:translate(-50%,-50%) scale(1)}
-#subAnnounce{
- position:absolute;left:50%;top:49%;transform:translate(-50%,-50%);
- font-size:17px;color:#dcecff;text-shadow:0 2px 5px #000;
- opacity:0;transition:.2s
-}
-#levelUp{
- position:absolute;inset:0;background:rgba(4,7,20,.72);
+#levelup,#chest,#gameover{
+ position:absolute;inset:0;background:rgba(3,5,14,.82);
  display:none;align-items:center;justify-content:center;
  pointer-events:auto;backdrop-filter:blur(5px)
 }
-#levelUp.open{display:flex}
-.levelPanel{
- width:min(920px,94vw);padding:28px;
- background:linear-gradient(180deg,#121a35ee,#080d20f5);
- border:1px solid #526a9c;border-radius:20px;
- box-shadow:0 20px 80px #000;
- text-align:center
+.panel{text-align:center;width:min(1000px,94vw)}
+.panel h1{font-size:48px;margin:0 0 10px;text-shadow:0 0 25px #65eaff}
+.panel p{color:#aeb8d2}
+.choices{display:flex;gap:16px;justify-content:center;margin-top:25px}
+.choice{
+ width:270px;min-height:190px;padding:20px;
+ border-radius:18px;background:linear-gradient(145deg,#151c35,#080c19);
+ border:1px solid #344266;cursor:pointer;
+ transition:.15s;box-shadow:0 12px 40px rgba(0,0,0,.4)
 }
-.levelTitle{
- font-size:42px;font-weight:900;
- color:#7deaff;text-shadow:0 0 25px #28dfff;
- margin-bottom:5px
+.choice:hover{transform:translateY(-8px) scale(1.03);border-color:#75edff;box-shadow:0 0 35px rgba(80,220,255,.3)}
+.choice .icon{font-size:48px}
+.choice h2{font-size:20px;margin:8px 0}
+.choice .lv{color:#71efff;font-weight:bold}
+.choice .desc{font-size:13px;color:#aab5ce;line-height:1.5}
+.rarity{font-size:11px;color:#ffd86b}
+#chest .panel h1{color:#ffe66d}
+#chestCard{
+ margin:auto;width:330px;padding:28px;border-radius:20px;
+ background:linear-gradient(145deg,#392c09,#14100a);
+ border:2px solid #ffe26a;box-shadow:0 0 70px #ffb00066;
+ cursor:pointer
 }
-.levelSub{color:#91a4c7;margin-bottom:20px}
-.cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
-.card{
- min-height:190px;border:2px solid #344b73;border-radius:16px;
- background:linear-gradient(145deg,#172442,#0b1226);
- padding:20px;cursor:pointer;transition:.15s;
- box-shadow:0 8px 25px #0006
-}
-.card:hover{
- transform:translateY(-7px) scale(1.02);
- border-color:#6be9ff;box-shadow:0 0 25px #26dfff44
-}
-.card.weapon{border-color:#6e55d9}
-.card.passive{border-color:#45cfa5}
-.cardIcon{font-size:48px;margin-bottom:10px}
-.cardName{font-size:20px;font-weight:bold}
-.cardType{font-size:11px;color:#8ea8ca;margin:5px}
-.cardDesc{font-size:12px;color:#c6d2e6;line-height:1.6}
-.cardLv{margin-top:9px;color:#ffd45a;font-weight:bold}
-#start{
- position:absolute;inset:0;background:
- radial-gradient(circle at 50% 45%,#182d55 0,#090d20 42%,#03050c 100%);
- display:flex;align-items:center;justify-content:center;
- pointer-events:auto
-}
-.startPanel{text-align:center}
-.title{
- font-size:64px;font-weight:1000;letter-spacing:8px;
- text-shadow:0 0 30px #2de5ff,0 8px 30px #000
-}
-.subtitle{color:#91a9ca;margin:10px 0 35px}
-.startBtn{
- padding:16px 60px;border-radius:12px;border:1px solid #69e9ff;
- background:#122b4a;color:white;font-size:20px;font-weight:bold;cursor:pointer;
- box-shadow:0 0 25px #28dfff44
-}
-.help{margin-top:18px;color:#7183a2;font-size:13px}
-#pause{
- position:absolute;inset:0;display:none;align-items:center;justify-content:center;
- background:#020510aa;pointer-events:auto
-}
-#pause.show{display:flex}
-.pauseBox{background:#111a31;border:1px solid #52658e;border-radius:15px;padding:30px 60px;text-align:center}
-#gameOver,#clear{
- position:absolute;inset:0;display:none;align-items:center;justify-content:center;
- background:rgba(3,5,15,.82);pointer-events:auto
-}
-.resultBox{
- width:min(550px,90vw);padding:35px;text-align:center;
- background:#10182deF;border:1px solid #50658e;border-radius:20px;
- box-shadow:0 20px 70px #000
-}
-.resultTitle{font-size:48px;font-weight:900}
-.resultStats{line-height:2;color:#b9c9df;margin:20px}
-.resultBtn{
- padding:12px 35px;background:#18385c;border:1px solid #5de5ff;
- color:#fff;border-radius:10px;font-weight:bold;cursor:pointer
-}
-#damageFlash{
- position:absolute;inset:0;background:#ff315c;opacity:0;pointer-events:none
-}
-#bossBar{
- position:absolute;left:50%;top:91px;transform:translateX(-50%);
- width:min(620px,70vw);display:none
-}
-#bossName{text-align:center;font-weight:bold;font-size:13px;margin-bottom:4px;text-shadow:0 2px 5px #000}
-#bossFill{height:13px;background:#31131c;border:1px solid #a83b57;border-radius:8px;overflow:hidden}
-#bossFillInner{height:100%;background:linear-gradient(90deg,#ff2459,#ff7d35);width:100%}
-@media(max-width:700px){
- .title{font-size:38px}.cards{grid-template-columns:1fr}
- .card{min-height:130px;padding:12px}
- #weaponUI{width:250px}.slot{width:48px;height:48px}
- #passiveUI{display:none}
+#chestIcon{font-size:80px}
+#gameover .panel h1{color:#ff536e}
+button{
+ pointer-events:auto;border:0;border-radius:10px;padding:12px 25px;
+ background:#273758;color:white;font-weight:bold;font-size:15px;cursor:pointer
 }
 </style>
 </head>
 <body>
-
 <canvas id="game"></canvas>
 
 <div id="ui">
-  <div id="top">
-    <div id="hpBox" class="bar">
-      <div id="hpFill"></div><div id="hpText" class="barText">HP 100 / 100</div>
-    </div>
-    <div id="expBox" class="bar">
-      <div id="expFill"></div><div id="expText" class="barText">EXP 0 / 20</div>
-    </div>
+ <div id="top">
+  <div id="levelBox">
+   <div>LEVEL <span id="lv">1</span> / 999</div>
+   <div class="bar"><div id="expFill"></div></div>
   </div>
-
+  <div id="hpWrap">
+   <div class="bar"><div id="hpFill"></div></div>
+  </div>
   <div id="time">00:00</div>
-  <div id="level">LEVEL 1</div>
-  <div id="stats">KILLS 0　COIN 0</div>
+ </div>
 
-  <div id="combo">
-    <div id="comboNum">0</div>
-    <div id="comboLabel">KILL COMBO</div>
+ <div id="combo">0 <small>COMBO</small></div>
+ <div id="stats"></div>
+ <div id="slots">
+  <div class="slotRow" id="weaponSlots"></div>
+  <div class="slotRow" id="passiveSlots"></div>
+ </div>
+ <div id="message"></div>
+
+ <div id="levelup">
+  <div class="panel">
+   <h1>LEVEL UP</h1>
+   <p>武器・道具を選択して強化</p>
+   <div class="choices" id="choices"></div>
   </div>
+ </div>
 
-  <div id="bossBar">
-    <div id="bossName">BOSS</div>
-    <div id="bossFill"><div id="bossFillInner"></div></div>
+ <div id="chest">
+  <div class="panel">
+   <h1>✦ TREASURE CHEST ✦</h1>
+   <div id="chestCard">
+    <div id="chestIcon">🎁</div>
+    <h2 id="chestTitle">宝箱を開く</h2>
+    <p id="chestText">進化の力が眠っている……</p>
+   </div>
   </div>
+ </div>
 
-  <div id="weaponUI"></div>
-  <div id="passiveUI"></div>
-
-  <div id="announce"></div>
-  <div id="subAnnounce"></div>
-
-  <div id="levelUp">
-    <div class="levelPanel">
-      <div class="levelTitle">LEVEL UP!</div>
-      <div class="levelSub">強化を1つ選択</div>
-      <div class="cards" id="cards"></div>
-    </div>
+ <div id="gameover">
+  <div class="panel">
+   <h1 id="resultTitle">STAGE CLEAR</h1>
+   <p id="resultText"></p>
+   <button onclick="location.reload()">もう一度プレイ</button>
   </div>
-
-  <div id="pause">
-    <div class="pauseBox">
-      <div style="font-size:30px;font-weight:bold">PAUSED</div>
-      <div style="margin-top:12px;color:#94a7c5">Pキーで再開</div>
-    </div>
-  </div>
-
-  <div id="damageFlash"></div>
-
-  <div id="gameOver">
-    <div class="resultBox">
-      <div class="resultTitle">GAME OVER</div>
-      <div class="resultStats" id="overStats"></div>
-      <button class="resultBtn" onclick="location.reload()">もう一度</button>
-    </div>
-  </div>
-
-  <div id="clear">
-    <div class="resultBox">
-      <div class="resultTitle" style="color:#7df5ff;text-shadow:0 0 25px #26dfff">STAGE CLEAR!</div>
-      <div class="resultStats" id="clearStats"></div>
-      <button class="resultBtn" onclick="location.reload()">もう一度プレイ</button>
-    </div>
-  </div>
-
-  <div id="start">
-    <div class="startPanel">
-      <div class="title">HYPER SURVIVOR</div>
-      <div class="subtitle">15 MINUTES OF CHAOS</div>
-      <button class="startBtn" onclick="startGame()">START</button>
-      <div class="help">移動：↑ ↓ ← →　　P：一時停止</div>
-    </div>
-  </div>
+ </div>
 </div>
 
 <script>
@@ -267,2991 +157,1683 @@ canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
 ========================================================= */
 const canvas=document.getElementById("game");
 const ctx=canvas.getContext("2d");
-let W=innerWidth,H=innerHeight,DPR=Math.min(devicePixelRatio||1,2);
-
+let W=innerWidth,H=innerHeight;
 function resize(){
-  W=innerWidth; H=innerHeight;
-  canvas.width=W*DPR;
-  canvas.height=H*DPR;
-  canvas.style.width=W+"px";
-  canvas.style.height=H+"px";
-  ctx.setTransform(DPR,0,0,DPR,0,0);
+ W=canvas.width=innerWidth;
+ H=canvas.height=innerHeight;
 }
 addEventListener("resize",resize);
 resize();
 
 /* =========================================================
-   INPUT
+   DATA
 ========================================================= */
-const keys={};
-addEventListener("keydown",e=>{
-  if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"," "].includes(e.key))e.preventDefault();
-  keys[e.key]=true;
 
-  if(e.key==="p"||e.key==="P"){
-    if(!game.started||game.over||game.cleared||levelSelecting)return;
-    game.paused=!game.paused;
-    document.getElementById("pause").classList.toggle("show",game.paused);
-  }
-});
-addEventListener("keyup",e=>keys[e.key]=false);
+const WEAPONS=[
+ {id:"starblade",name:"星刃",icon:"✦",type:"orbit",evo:"星界輪",passive:"magnet"},
+ {id:"thunder",name:"天雷",icon:"⚡",type:"lightning",evo:"天雷神域",passive:"power"},
+ {id:"meteor",name:"流星",icon:"☄",type:"meteor",evo:"星墜",passive:"power"},
+ {id:"gravity",name:"重力球",icon:"●",type:"gravity",evo:"超重力核",passive:"magnet"},
+ {id:"void",name:"虚空砲",icon:"◉",type:"laser",evo:"終焉砲",passive:"power"},
+ {id:"flame",name:"焔弾",icon:"🔥",type:"fire",evo:"煉獄",passive:"power"},
+ {id:"ice",name:"凍界槍",icon:"❄",type:"ice",evo:"絶対零度",passive:"power"},
+ {id:"shadow",name:"影葬",icon:"◆",type:"shadow",evo:"影界葬",passive:"crit"},
+ {id:"halo",name:"光輪",icon:"◎",type:"halo",evo:"神聖輪",passive:"power"},
+ {id:"endwave",name:"終焉波",icon:"◌",type:"wave",evo:"終焉",passive:"power"},
+ {id:"axe",name:"断空斧",icon:"🪓",type:"axe",evo:"天断斧",passive:"power"},
+ {id:"core",name:"星核",icon:"✹",type:"core",evo:"超星核",passive:"crit"},
+ {id:"bomb",name:"爆界玉",icon:"✺",type:"bomb",evo:"爆界天球",passive:"power"},
+ {id:"door",name:"虚無門",icon:"◉",type:"blackhole",evo:"無限門",passive:"magnet"},
+ {id:"phantom",name:"幻影刃",icon:"⚔",type:"phantom",evo:"百鬼刃",passive:"attackSpeed"},
+ {id:"spiral",name:"螺旋弾",icon:"✧",type:"spiral",evo:"銀河螺旋",passive:"attackSpeed"},
+ {id:"ray",name:"光線砲",icon:"—",type:"ray",evo:"超光線",passive:"power"},
+ {id:"orb",name:"魔力球",icon:"●",type:"orb",evo:"魔力星",passive:"power"},
+ {id:"blade",name:"風刃",icon:"〰",type:"wind",evo:"嵐刃",passive:"attackSpeed"},
+ {id:"flameRing",name:"炎輪",icon:"○",type:"flamering",evo:"天炎輪",passive:"power"},
+ {id:"iceRain",name:"氷雨",icon:"❄",type:"icerain",evo:"氷河崩壊",passive:"power"},
+ {id:"poison",name:"毒霧",icon:"☁",type:"poison",evo:"猛毒領域",passive:"power"},
+ {id:"spear",name:"神槍",icon:"↑",type:"spear",evo:"神槍天墜",passive:"crit"},
+ {id:"pulse",name:"衝撃波",icon:"◎",type:"pulse",evo:"大衝撃",passive:"power"},
+ {id:"drone",name:"浮遊砲",icon:"◇",type:"drone",evo:"天帝砲",passive:"attackSpeed"},
+ {id:"chain",name:"連鎖球",icon:"⚡",type:"chain",evo:"無限連鎖",passive:"crit"},
+ {id:"moon",name:"月輪",icon:"☾",type:"moon",evo:"月蝕輪",passive:"power"},
+ {id:"crystal",name:"結晶弾",icon:"◆",type:"crystal",evo:"結晶世界",passive:"power"},
+ {id:"rainbow",name:"七星弾",icon:"✦",type:"rainbow",evo:"七星天環",passive:"luck"},
+ {id:"nova",name:"ノヴァ",icon:"✹",type:"nova",evo:"超新星",passive:"power"}
+];
 
-/* =========================================================
-   UTILS
-========================================================= */
-const TAU=Math.PI*2;
-const rand=(a,b)=>Math.random()*(b-a)+a;
-const randi=(a,b)=>Math.floor(rand(a,b+1));
-const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
-const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
-const chance=p=>Math.random()<p;
-function angleTo(a,b){return Math.atan2(b.y-a.y,b.x-a.x)}
-function lerp(a,b,t){return a+(b-a)*t}
-function formatTime(sec){
-  sec=Math.floor(sec);
-  return String(Math.floor(sec/60)).padStart(2,"0")+":"+String(sec%60).padStart(2,"0");
-}
-function worldToScreen(x,y){
-  return {x:x-camera.x+W/2,y:y-camera.y+H/2};
-}
-function circleHit(a,b,r){return (a.x-b.x)**2+(a.y-b.y)**2<r*r}
+const PASSIVES=[
+ {id:"power",name:"攻撃力の書",icon:"⚔",stat:"attack"},
+ {id:"attackSpeed",name:"加速の書",icon:"⏩",stat:"attackSpeed"},
+ {id:"moveSpeed",name:"疾走の靴",icon:"👟",stat:"moveSpeed"},
+ {id:"magnet",name:"磁石",icon:"🧲",stat:"magnet"},
+ {id:"maxhp",name:"生命の核",icon:"❤",stat:"maxHp"},
+ {id:"defense",name:"守護の盾",icon:"🛡",stat:"defense"},
+ {id:"crit",name:"会心の眼",icon:"◉",stat:"crit"},
+ {id:"regen",name:"再生の泉",icon:"✚",stat:"regen"},
+ {id:"luck",name:"幸運の指輪",icon:"♢",stat:"luck"},
+ {id:"exp",name:"知識の書",icon:"★",stat:"exp"},
+ {id:"coin",name:"黄金の指輪",icon:"¤",stat:"coin"},
+ {id:"duration",name:"時の砂",icon:"⌛",stat:"duration"}
+];
 
 /* =========================================================
    GAME STATE
 ========================================================= */
-const game={
- started:false,
- paused:false,
- over:false,
- cleared:false,
- time:0,
- kills:0,
- coins:0,
- combo:0,
- comboTimer:0,
- maxCombo:0,
- level:1,
- exp:0,
- nextExp:20,
- pendingLevels:0,
- totalDamage:0,
- shake:0,
- boss:null,
- stage:1,
- seed:Math.random()*99999
-};
 
 const player={
- x:0,y:0,r:16,
+ x:W/2,y:H/2,
+ level:1,exp:0,nextExp:20,
  hp:100,maxHp:100,
- moveSpeed:250,
- attackPower:1,
- attackSpeed:1,
- magnet:95,
- expGain:1,
- coinGain:1,
- crit:0.05,
- critDamage:2,
- defense:0,
- regen:0,
- luck:0,
- invuln:0
+ attack:10,attackSpeed:1,
+ moveSpeed:250,magnet:100,
+ defense:0,crit:.05,critMult:2,
+ regen:0,expGain:1,coinGain:1,luck:0,duration:1,
+ weapons:[],
+ passives:[],
+ invincible:0
 };
 
-/* =========================================================
-   ARRAYS
-========================================================= */
-let enemies=[];
-let gems=[];
-let coins=[];
-let attacks=[];
-let particles=[];
-let texts=[];
-let rings=[];
-let trails=[];
-let enemyId=1;
-
-/* =========================================================
-   WEAPONS
-   初期武器は1個だけ。
-   レベルアップで新しい武器を取得可能。
-========================================================= */
-const weaponDefs={
-
-  starBlade:{
-    name:"星刃",icon:"✦",type:"weapon",
-    color:"#b9ecff",
-    baseDamage:18,cooldown:.75,
-    desc:"巨大な刃が周囲を斬り裂く。",
-    passive:"none",
-    fire(w){
-      const count=w.level>=10?4:w.level>=6?3:w.level>=3?2:1;
-      for(let i=0;i<count;i++){
-        const base=(game.time*1.8)+(TAU*i/count);
-        attacks.push({
-          kind:"blade",x:player.x,y:player.y,
-          a:base,life:.52,max:.52,
-          radius:65+w.level*7,
-          width:28+w.level*2,
-          damage:weaponDamage(w),
-          hit:new Set()
-        });
-      }
-      if(w.level>=8){
-        shock(player.x,player.y,70+w.level*6,w.damage*1.5,"#aeeaff");
-      }
-    }
-  },
-
-  fireball:{
-    name:"焔弾",icon:"🔥",type:"weapon",
-    color:"#ff733d",baseDamage:25,cooldown:.65,
-    desc:"敵へ飛ぶ巨大な火球。着弾時に爆発。",
-    fire(w){
-      const target=nearestEnemy();
-      if(!target)return;
-      const a=angleTo(player,target);
-      attacks.push({
-        kind:"fireball",x:player.x,y:player.y,
-        vx:Math.cos(a)*470,vy:Math.sin(a)*470,
-        life:2.2,max:2.2,r:9+w.level*1.5,
-        damage:weaponDamage(w),hit:new Set()
-      });
-    }
-  },
-
-  thunder:{
-    name:"天雷",icon:"⚡",type:"weapon",
-    color:"#f6f0ff",baseDamage:34,cooldown:.9,
-    desc:"敵の頭上に予告を出し、巨大な雷を落とす。",
-    fire(w){
-      const count=w.level>=8?4:w.level>=5?3:w.level>=3?2:1;
-      const targets=nearestEnemies(count);
-      targets.forEach((e,i)=>{
-        attacks.push({
-          kind:"thunder",x:e.x,y:e.y,
-          life:.55+i*.08,max:.55+i*.08,
-          damage:weaponDamage(w)*(e.boss?2.2:1),
-          target:e,hit:false
-        });
-      });
-    }
-  },
-
-  meteor:{
-    name:"流星",icon:"☄",type:"weapon",
-    color:"#ff9c54",baseDamage:45,cooldown:1.7,
-    desc:"空から流星が降り、着弾地点を爆発させる。",
-    fire(w){
-      const target=nearestEnemy()||{x:player.x+rand(-250,250),y:player.y+rand(-180,180)};
-      const x=target.x+rand(-90,90),y=target.y+rand(-90,90);
-      attacks.push({
-        kind:"meteor",x,y,
-        life:1.05,max:1.05,
-        damage:weaponDamage(w),
-        r:35+w.level*4
-      });
-    }
-  },
-
-  gravity:{
-    name:"重力球",icon:"◉",type:"weapon",
-    color:"#b67cff",baseDamage:22,cooldown:2.1,
-    desc:"巨大な重力球が敵を吸い寄せて圧縮する。",
-    fire(w){
-      const p=nearestEnemy()||player;
-      attacks.push({
-        kind:"gravity",x:p.x,y:p.y,
-        life:1.5,max:1.5,
-        r:35+w.level*7,
-        damage:weaponDamage(w)
-      });
-    }
-  },
-
-  voidCannon:{
-    name:"虚空砲",icon:"▰",type:"weapon",
-    color:"#d7c3ff",baseDamage:65,cooldown:2.3,
-    desc:"前方にエネルギーを集め、極太レーザーを放つ。",
-    fire(w){
-      const target=nearestEnemy();
-      const a=target?angleTo(player,target):0;
-      attacks.push({
-        kind:"voidCannon",x:player.x,y:player.y,a,
-        life:.85,max:.85,
-        damage:weaponDamage(w),
-        length:420+w.level*35
-      });
-    }
-  },
-
-  iceSpear:{
-    name:"凍界槍",icon:"❄",type:"weapon",
-    color:"#6ee8ff",baseDamage:50,cooldown:1.45,
-    desc:"巨大な氷槍が一直線に突き抜ける。",
-    fire(w){
-      const target=nearestEnemy();
-      const a=target?angleTo(player,target):0;
-      attacks.push({
-        kind:"iceSpear",x:player.x,y:player.y,a,
-        life:.6,max:.6,
-        damage:weaponDamage(w),
-        length:520+w.level*30
-      });
-    }
-  },
-
-  shadowBurial:{
-    name:"影葬",icon:"☾",type:"weapon",
-    color:"#9c77ff",baseDamage:38,cooldown:1.25,
-    desc:"敵の足元から影の刃が突き出す。",
-    fire(w){
-      const count=w.level>=8?8:w.level>=5?6:w.level>=3?4:2;
-      const ts=nearestEnemies(count);
-      ts.forEach(e=>{
-        attacks.push({
-          kind:"shadow",x:e.x,y:e.y,
-          life:.5,max:.5,
-          damage:weaponDamage(w),target:e
-        });
-      });
-    }
-  },
-
-  lightRing:{
-    name:"光輪",icon:"◎",type:"weapon",
-    color:"#fff4a5",baseDamage:28,cooldown:1.15,
-    desc:"巨大な光輪が周囲を回転しながら敵を薙ぎ払う。",
-    fire(w){
-      attacks.push({
-        kind:"lightRing",x:player.x,y:player.y,
-        life:.85,max:.85,
-        radius:70+w.level*8,
-        damage:weaponDamage(w),
-        a:game.time*3
-      });
-    }
-  },
-
-  endWave:{
-    name:"終焉波",icon:"◈",type:"weapon",
-    color:"#ff68c8",baseDamage:55,cooldown:3,
-    desc:"全方向へ巨大な衝撃波を放つ。",
-    fire(w){
-      attacks.push({
-        kind:"endWave",x:player.x,y:player.y,
-        life:.9,max:.9,r:15,
-        maxR:260+w.level*35,
-        damage:weaponDamage(w),
-        hit:new Set()
-      });
-    }
-  },
-
-  axe:{
-    name:"断空斧",icon:"🪓",type:"weapon",
-    color:"#ffc36b",baseDamage:60,cooldown:1.8,
-    desc:"巨大な斧が画面を横切り、戻ってくる。",
-    fire(w){
-      const a=nearestEnemy()?angleTo(player,nearestEnemy()):0;
-      attacks.push({
-        kind:"axe",x:player.x,y:player.y,
-        a,life:1.1,max:1.1,
-        damage:weaponDamage(w),
-        length:500+w.level*35,
-        hit:new Set()
-      });
-    }
-  },
-
-  starCore:{
-    name:"星核",icon:"✹",type:"weapon",
-    color:"#9de9ff",baseDamage:42,cooldown:1.7,
-    desc:"小さな星核が周囲を巡り、敵へ衝突する。",
-    fire(w){
-      const count=w.level>=8?5:w.level>=5?4:3;
-      for(let i=0;i<count;i++){
-        attacks.push({
-          kind:"starCore",x:player.x,y:player.y,
-          a:TAU*i/count+game.time*2,
-          life:1.4,max:1.4,
-          damage:weaponDamage(w),r:12+w.level
-        });
-      }
-    }
-  },
-
-  bomb:{
-    name:"爆界玉",icon:"✹",type:"weapon",
-    color:"#ff765c",baseDamage:48,cooldown:1.5,
-    desc:"爆発後、小さな弾丸を周囲へ撒き散らす。",
-    fire(w){
-      const e=nearestEnemy()||player;
-      attacks.push({
-        kind:"bomb",x:e.x,y:e.y,
-        life:.75,max:.75,
-        damage:weaponDamage(w),
-        r:28+w.level*4,
-        level:w.level
-      });
-    }
-  },
-
-  voidGate:{
-    name:"虚無門",icon:"●",type:"weapon",
-    color:"#8d62ff",baseDamage:32,cooldown:2.6,
-    desc:"小型ブラックホールを生成し、敵を吸い込む。",
-    fire(w){
-      const e=nearestEnemy()||player;
-      attacks.push({
-        kind:"voidGate",x:e.x,y:e.y,
-        life:2,max:2,
-        r:35+w.level*5,
-        damage:weaponDamage(w)
-      });
-    }
-  },
-
-  phantomBlade:{
-    name:"幻影刃",icon:"⚔",type:"weapon",
-    color:"#e2d2ff",baseDamage:30,cooldown:1.1,
-    desc:"幻影の剣士が複数方向から同時攻撃する。",
-    fire(w){
-      const n=w.level>=8?8:w.level>=5?6:w.level>=3?4:2;
-      for(let i=0;i<n;i++){
-        attacks.push({
-          kind:"phantom",x:player.x,y:player.y,
-          a:TAU*i/n+rand(-.15,.15),
-          life:.5,max:.5,
-          damage:weaponDamage(w),
-          len:100+w.level*12
-        });
-      }
-    }
-  },
-
-  orbitFire:{
-    name:"炎星環",icon:"🔥",type:"weapon",
-    color:"#ffad42",baseDamage:20,cooldown:1.3,
-    desc:"炎の弾が軌道を描きながら周囲を回る。",
-    fire(w){
-      attacks.push({
-        kind:"orbitFire",x:player.x,y:player.y,
-        life:1.2,max:1.2,
-        count:w.level>=7?8:5,
-        damage:weaponDamage(w)
-      });
-    }
-  },
-
-  laserRain:{
-    name:"光雨",icon:"☀",type:"weapon",
-    color:"#ffe78a",baseDamage:24,cooldown:1.8,
-    desc:"空から無数の光線が降り注ぐ。",
-    fire(w){
-      const n=w.level>=8?18:w.level>=5?12:8;
-      for(let i=0;i<n;i++){
-        const e=nearestEnemy();
-        attacks.push({
-          kind:"rainLaser",
-          x:(e?e.x:player.x)+rand(-180,180),
-          y:(e?e.y:player.y)+rand(-150,150),
-          life:.4+rand(0,.35),max:.4+rand(0,.35),
-          damage:weaponDamage(w)*.55
-        });
-      }
-    }
-  },
-
-  bladeStorm:{
-    name:"刃嵐",icon:"✧",type:"weapon",
-    color:"#a7c8ff",baseDamage:23,cooldown:.95,
-    desc:"無数の刃が周囲を高速で飛び交う。",
-    fire(w){
-      const n=w.level>=8?16:w.level>=5?11:7;
-      for(let i=0;i<n;i++){
-        attacks.push({
-          kind:"bladeStorm",
-          x:player.x,y:player.y,
-          a:rand(0,TAU),
-          life:.7,max:.7,
-          damage:weaponDamage(w),
-          len:100+w.level*9
-        });
-      }
-    }
-  },
-
-  plasma:{
-    name:"プラズマ弾",icon:"⚛",type:"weapon",
-    color:"#6affd0",baseDamage:35,cooldown:.8,
-    desc:"高速プラズマ弾が敵を貫通する。",
-    fire(w){
-      const e=nearestEnemy();
-      const a=e?angleTo(player,e):rand(0,TAU);
-      attacks.push({
-        kind:"plasma",x:player.x,y:player.y,
-        vx:Math.cos(a)*650,vy:Math.sin(a)*650,
-        life:1,max:1,
-        damage:weaponDamage(w),
-        r:7+w.level
-      });
-    }
-  },
-
-  moonAxe:{
-    name:"月輪斧",icon:"☾",type:"weapon",
-    color:"#d0b4ff",baseDamage:52,cooldown:2,
-    desc:"巨大な三日月斧が円弧を描いて飛ぶ。",
-    fire(w){
-      attacks.push({
-        kind:"moonAxe",x:player.x,y:player.y,
-        a:nearestEnemy()?angleTo(player,nearestEnemy()):0,
-        life:.9,max:.9,
-        damage:weaponDamage(w),
-        len:300+w.level*25
-      });
-    }
-  },
-
-  frostNova:{
-    name:"氷結爆域",icon:"✥",type:"weapon",
-    color:"#7beaff",baseDamage:45,cooldown:2.4,
-    desc:"周囲を一瞬で凍らせる大爆発。",
-    fire(w){
-      attacks.push({
-        kind:"frostNova",x:player.x,y:player.y,
-        life:.7,max:.7,
-        r:20,maxR:190+w.level*20,
-        damage:weaponDamage(w),
-        hit:new Set()
-      });
-    }
-  },
-
-  soulSpear:{
-    name:"魂槍",icon:"➤",type:"weapon",
-    color:"#ff6bf0",baseDamage:80,cooldown:2.7,
-    desc:"敵を追尾する巨大な光槍。",
-    fire(w){
-      const e=nearestEnemy();
-      if(!e)return;
-      const a=angleTo(player,e);
-      attacks.push({
-        kind:"soulSpear",x:player.x,y:player.y,
-        vx:Math.cos(a)*560,vy:Math.sin(a)*560,
-        life:1.4,max:1.4,
-        damage:weaponDamage(w),
-        r:14+w.level
-      });
-    }
-  },
-
-  storm:{
-    name:"嵐球",icon:"🌀",type:"weapon",
-    color:"#8cdfff",baseDamage:30,cooldown:1.25,
-    desc:"電撃をまとった竜巻が敵を巻き込む。",
-    fire(w){
-      const e=nearestEnemy()||player;
-      attacks.push({
-        kind:"storm",x:e.x,y:e.y,
-        life:1.4,max:1.4,
-        r:35+w.level*4,
-        damage:weaponDamage(w)
-      });
-    }
-  },
-
-  meteorRain:{
-    name:"隕石雨",icon:"☄",type:"weapon",
-    color:"#ff7852",baseDamage:35,cooldown:2.8,
-    desc:"大量の隕石が広範囲へ連続落下。",
-    fire(w){
-      const n=w.level>=8?15:w.level>=5?10:6;
-      for(let i=0;i<n;i++){
-        attacks.push({
-          kind:"smallMeteor",
-          x:player.x+rand(-330,330),
-          y:player.y+rand(-250,250),
-          life:rand(.5,1.3),max:rand(.5,1.3),
-          damage:weaponDamage(w)*.7,
-          r:20+w.level*2
-        });
-      }
-    }
-  },
-
-  crossSlash:{
-    name:"十字斬",icon:"✚",type:"weapon",
-    color:"#dceaff",baseDamage:70,cooldown:1.7,
-    desc:"巨大な十字斬撃が敵を薙ぎ払う。",
-    fire(w){
-      attacks.push({
-        kind:"crossSlash",x:player.x,y:player.y,
-        life:.65,max:.65,
-        damage:weaponDamage(w),
-        len:220+w.level*20,
-        hit:new Set()
-      });
-    }
-  },
-
-  energyOrb:{
-    name:"爆裂光球",icon:"◉",type:"weapon",
-    color:"#72f0ff",baseDamage:36,cooldown:1,
-    desc:"光球が敵を追い、接触すると連鎖爆発。",
-    fire(w){
-      const e=nearestEnemy();
-      if(!e)return;
-      const a=angleTo(player,e);
-      attacks.push({
-        kind:"energyOrb",x:player.x,y:player.y,
-        vx:Math.cos(a)*360,vy:Math.sin(a)*360,
-        life:2,max:2,
-        damage:weaponDamage(w),r:12+w.level
-      });
-    }
-  },
-
-  sunBurst:{
-    name:"太陽爆",icon:"☀",type:"weapon",
-    color:"#ffd35e",baseDamage:75,cooldown:3.2,
-    desc:"巨大な太陽を生み出して爆発させる。",
-    fire(w){
-      attacks.push({
-        kind:"sunBurst",x:player.x,y:player.y,
-        life:1.1,max:1.1,
-        r:15,maxR:250+w.level*30,
-        damage:weaponDamage(w),
-        hit:new Set()
-      });
-    }
-  },
-
-  phantomRain:{
-    name:"幻影雨",icon:"✦",type:"weapon",
-    color:"#ff9bea",baseDamage:28,cooldown:1.4,
-    desc:"幻影の剣が敵群へ次々と落下する。",
-    fire(w){
-      const n=w.level>=7?14:8;
-      for(let i=0;i<n;i++){
-        const e=nearestEnemy();
-        attacks.push({
-          kind:"phantomRain",
-          x:(e?e.x:player.x)+rand(-100,100),
-          y:(e?e.y:player.y)+rand(-100,100),
-          life:.5,max:.5,
-          damage:weaponDamage(w)
-        });
-      }
-    }
-  },
-
-  chainLightning:{
-    name:"連鎖雷",icon:"⚡",type:"weapon",
-    color:"#d8c6ff",baseDamage:32,cooldown:1.15,
-    desc:"雷が敵から敵へ高速で連鎖する。",
-    fire(w){
-      const ts=nearestEnemies(w.level>=8?10:w.level>=5?7:4);
-      if(!ts.length)return;
-      attacks.push({
-        kind:"chainLightning",
-        targets:ts,
-        index:0,
-        life:.65,max:.65,
-        damage:weaponDamage(w),
-        lines:[]
-      });
-    }
-  },
-
-  bladeCannon:{
-    name:"剣砲",icon:"▰",type:"weapon",
-    color:"#b9d9ff",baseDamage:90,cooldown:2.5,
-    desc:"巨大な剣を砲弾のように撃ち出す。",
-    fire(w){
-      const e=nearestEnemy();
-      const a=e?angleTo(player,e):0;
-      attacks.push({
-        kind:"bladeCannon",x:player.x,y:player.y,
-        a,life:1,max:1,
-        damage:weaponDamage(w),
-        len:250+w.level*25
-      });
-    }
-  },
-
-  blackSun:{
-    name:"黒太陽",icon:"●",type:"weapon",
-    color:"#d08aff",baseDamage:100,cooldown:3.5,
-    desc:"黒い太陽が周囲の敵を飲み込み爆発する。",
-    fire(w){
-      attacks.push({
-        kind:"blackSun",x:player.x,y:player.y,
-        life:2,max:2,
-        r:30+w.level*5,
-        damage:weaponDamage(w)
-      });
-    }
-  },
-
-  infinity:{
-    name:"無限輪",icon:"∞",type:"weapon",
-    color:"#ffffff",baseDamage:45,cooldown:1.5,
-    desc:"複数の光輪が交差し続ける。",
-    fire(w){
-      attacks.push({
-        kind:"infinity",x:player.x,y:player.y,
-        life:1,max:1,
-        damage:weaponDamage(w),
-        r:100+w.level*10,
-        hit:new Set()
-      });
-    }
-  },
-
-  finalRay:{
-    name:"終極光線",icon:"✦",type:"weapon",
-    color:"#ffffff",baseDamage:150,cooldown:4,
-    desc:"画面を横断する極大レーザー。",
-    fire(w){
-      const e=nearestEnemy();
-      const a=e?angleTo(player,e):0;
-      attacks.push({
-        kind:"finalRay",x:player.x,y:player.y,a,
-        life:1.25,max:1.25,
-        damage:weaponDamage(w),
-        length:700+w.level*50
-      });
-    }
-  }
+let game={
+ running:true,
+ paused:false,
+ time:0,
+ kills:0,
+ combo:0,
+ comboTimer:0,
+ coins:0,
+ enemies:[],
+ gems:[],
+ attacks:[],
+ particles:[],
+ texts:[],
+ bosses:[],
+ nextBoss:300,
+ screenShake:0,
+ chest:null,
+ last:performance.now()
 };
 
-/* =========================================================
-   EVOLUTION DEFINITIONS
-========================================================= */
-const evolutions={
-  starBlade:{name:"星界輪",icon:"✦",desc:"巨大な星界輪と衝撃波で周囲を制圧。"},
-  fireball:{name:"煉獄弾",icon:"🔥",desc:"爆発が連鎖し、周囲へ炎を撒き散らす。"},
-  thunder:{name:"天帝雷",icon:"⚡",desc:"巨大雷柱から連鎖雷撃が発生。"},
-  meteor:{name:"終星流星",icon:"☄",desc:"複数の巨大流星が同時落下。"},
-  gravity:{name:"超重力核",icon:"◉",desc:"敵を完全に引き寄せ、圧縮爆発。"},
-  voidCannon:{name:"虚空終砲",icon:"▰",desc:"極太レーザーが長時間残留する。"},
-  iceSpear:{name:"絶対零槍",icon:"❄",desc:"画面を横断する巨大氷槍。"},
-  shadowBurial:{name:"冥界葬",icon:"☾",desc:"敵群全体から影の刃が出現。"},
-  lightRing:{name:"聖域光輪",icon:"◎",desc:"巨大光輪が多重回転し続ける。"},
-  endWave:{name:"終焉",icon:"◈",desc:"巨大な終焉波が何重にも広がる。"},
-  axe:{name:"天断斧",icon:"🪓",desc:"巨大斧が何度も画面を横断する。"},
-  starCore:{name:"星核爆誕",icon:"✹",desc:"星核が超新星爆発を起こす。"},
-  bomb:{name:"超爆界玉",icon:"✹",desc:"連続爆発と無数の散弾を発生。"},
-  voidGate:{name:"深淵門",icon:"●",desc:"巨大ブラックホールが敵を吸い込む。"},
-  phantomBlade:{name:"千幻剣",icon:"⚔",desc:"無数の幻影剣士が同時斬撃。"},
-  orbitFire:{name:"恒星環",icon:"🔥",desc:"恒星が周囲を高速回転し続ける。"},
-  laserRain:{name:"光神雨",icon:"☀",desc:"画面全体へ巨大な光柱が降る。"},
-  bladeStorm:{name:"剣界嵐",icon:"✧",desc:"刃の嵐が巨大な円形領域を制圧。"},
-  plasma:{name:"超新星プラズマ",icon:"⚛",desc:"極太プラズマが貫通し連鎖爆発。"},
-  moonAxe:{name:"月蝕斬",icon:"☾",desc:"巨大な月刃が全方向を切り裂く。"},
-  frostNova:{name:"絶零爆域",icon:"✥",desc:"広範囲を凍結させて巨大爆発。"},
-  soulSpear:{name:"魂天槍",icon:"➤",desc:"敵を貫き続ける巨大な魂槍。"},
-  storm:{name:"天嵐",icon:"🌀",desc:"巨大な嵐が敵群を巻き込む。"},
-  meteorRain:{name:"星墜雨",icon:"☄",desc:"空が隕石で埋め尽くされる。"},
-  crossSlash:{name:"神十字斬",icon:"✚",desc:"巨大な十字斬撃が何重にも広がる。"},
-  energyOrb:{name:"超光球",icon:"◉",desc:"光球が連鎖爆発を繰り返す。"},
-  sunBurst:{name:"恒星崩壊",icon:"☀",desc:"巨大な太陽が画面を焼き尽くす。"},
-  phantomRain:{name:"幻神雨",icon:"✦",desc:"無数の幻影剣が連続落下。"},
-  chainLightning:{name:"神連雷",icon:"⚡",desc:"雷が大量の敵を永続的に連鎖。"},
-  bladeCannon:{name:"神剣砲",icon:"▰",desc:"超巨大な剣が画面を貫通。"},
-  blackSun:{name:"終黒太陽",icon:"●",desc:"巨大黒太陽が周囲を完全に飲み込む。"},
-  infinity:{name:"無限神輪",icon:"∞",desc:"無限の輪が交差して敵を消し飛ばす。"},
-  finalRay:{name:"創世光線",icon:"✦",desc:"画面を横断する究極の光線。"}
-};
+let keys={};
+addEventListener("keydown",e=>{
+ if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)){
+  keys[e.key]=true;e.preventDefault();
+ }
+});
+addEventListener("keyup",e=>{
+ if(["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(e.key)){
+  keys[e.key]=false;e.preventDefault();
+ }
+});
 
 /* =========================================================
-   PASSIVES
+   UTILS
 ========================================================= */
-const passiveDefs={
-  power:{name:"攻撃力強化",icon:"⚔",desc:"攻撃力 +12%"},
-  speed:{name:"攻撃速度",icon:"⏱",desc:"攻撃速度 +10%"},
-  armor:{name:"防御力",icon:"🛡",desc:"被ダメージ軽減"},
-  magnet:{name:"磁力",icon:"🧲",desc:"EXP吸収範囲 +25"},
-  exp:{name:"経験値増加",icon:"◆",desc:"EXP獲得量 +12%"},
-  hp:{name:"生命力",icon:"♥",desc:"最大HP +18"},
-  move:{name:"俊足",icon:"➤",desc:"移動速度 +8%"},
-  crit:{name:"会心",icon:"✦",desc:"クリティカル率 +4%"},
-  coin:{name:"幸運",icon:"●",desc:"コイン獲得量 +12%"},
-  regen:{name:"再生",icon:"✚",desc:"毎秒HP回復 +0.4"}
-};
 
-let weapons=[];
-let passives=[];
+const rand=(a,b)=>Math.random()*(b-a)+a;
+const randi=(a,b)=>Math.floor(rand(a,b+1));
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const dist=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+
+function addText(x,y,text,color="#fff",size=18){
+ game.texts.push({x,y,text,color,size,life:.8,max:.8});
+}
+
+function particle(x,y,color,size=4,life=.5,vx=0,vy=0){
+ if(game.particles.length>700)return;
+ game.particles.push({x,y,color,size,life,max:life,vx,vy});
+}
+
+function burst(x,y,color,count=12,power=100){
+ for(let i=0;i<count;i++){
+  let a=Math.random()*Math.PI*2;
+  let s=Math.random()*power;
+  particle(x,y,color,rand(2,6),rand(.25,.7),Math.cos(a)*s,Math.sin(a)*s);
+ }
+}
+
+function flashMessage(text,color="#fff"){
+ const el=document.getElementById("message");
+ el.textContent=text;
+ el.style.color=color;
+ el.classList.remove("show");
+ void el.offsetWidth;
+ el.classList.add("show");
+}
 
 /* =========================================================
-   WEAPON HELPERS
+   INITIAL PLAYER
 ========================================================= */
-function weaponDamage(w){
-  const def=weaponDefs[w.id];
-  let d=def.baseDamage*(1+(w.level-1)*.18)*player.attackPower;
-  if(w.evolved)d*=2.35;
-  return d;
+
+function makeWeapon(id){
+ const d=WEAPONS.find(x=>x.id===id);
+ return {
+  ...d,
+  level:1,
+  cooldown:0,
+  angle:Math.random()*Math.PI*2,
+  evolution:false
+ };
 }
-function weaponCooldown(w){
-  const def=weaponDefs[w.id];
-  return def.cooldown/Math.max(.3,player.attackSpeed)*(1-Math.min(.45,(w.level-1)*.025));
+
+function makePassive(id){
+ const d=PASSIVES.find(x=>x.id===id);
+ return {...d,level:1};
 }
-function addWeapon(id){
-  if(weapons.length>=6)return false;
-  if(weapons.some(w=>w.id===id))return false;
-  weapons.push({
-    id,level:1,cooldown:0,evolved:false
-  });
-  updateWeaponUI();
-  return true;
+
+player.weapons.push(makeWeapon("starblade"));
+player.passives.push(makePassive("magnet"));
+
+/* =========================================================
+   PASSIVE EFFECTS
+========================================================= */
+
+function recalcStats(){
+ player.attack=10;
+ player.attackSpeed=1;
+ player.moveSpeed=250;
+ player.magnet=100;
+ player.maxHp=100;
+ player.defense=0;
+ player.crit=.05;
+ player.regen=0;
+ player.expGain=1;
+ player.coinGain=1;
+ player.duration=1;
+
+ for(const p of player.passives){
+  const n=p.level;
+  if(p.stat==="attack")player.attack+=n*2;
+  if(p.stat==="attackSpeed")player.attackSpeed+=n*.08;
+  if(p.stat==="moveSpeed")player.moveSpeed+=n*12;
+  if(p.stat==="magnet")player.magnet+=n*35;
+  if(p.stat==="maxHp")player.maxHp+=n*15;
+  if(p.stat==="defense")player.defense+=n*2;
+  if(p.stat==="crit")player.crit+=n*.025;
+  if(p.stat==="regen")player.regen+=n*.3;
+  if(p.stat==="exp")player.expGain+=n*.08;
+  if(p.stat==="coin")player.coinGain+=n*.1;
+  if(p.stat==="duration")player.duration+=n*.05;
+ }
+ player.hp=Math.min(player.hp,player.maxHp);
 }
-function addPassive(id){
-  const p=passives.find(x=>x.id===id);
-  if(p)p.level=Math.min(10,p.level+1);
-  else if(passives.length<6)passives.push({id,level:1});
-  applyPassives();
-  updatePassiveUI();
-}
-function applyPassives(){
-  player.attackPower=1;
-  player.attackSpeed=1;
-  player.maxHp=100;
-  player.moveSpeed=250;
-  player.magnet=95;
-  player.expGain=1;
-  player.coinGain=1;
-  player.crit=.05;
-  player.regen=0;
-  for(const p of passives){
-    const l=p.level;
-    if(p.id==="power")player.attackPower*=1+.12*l;
-    if(p.id==="speed")player.attackSpeed*=1+.10*l;
-    if(p.id==="hp")player.maxHp+=18*l;
-    if(p.id==="move")player.moveSpeed*=1+.08*l;
-    if(p.id==="magnet")player.magnet+=25*l;
-    if(p.id==="exp")player.expGain*=1+.12*l;
-    if(p.id==="coin")player.coinGain*=1+.12*l;
-    if(p.id==="crit")player.crit+=.04*l;
-    if(p.id==="regen")player.regen+=.4*l;
-    if(p.id==="armor"){}
+
+/* =========================================================
+   LEVEL UP CHOICES
+========================================================= */
+
+function generateChoices(){
+ const result=[];
+ const used=new Set();
+
+ const ownedW=player.weapons;
+ const ownedP=player.passives;
+
+ /*
+  武器:
+  6枠未満 → 新規 + 所持武器LvUP
+  6枠以上 → 所持武器LvUPのみ
+ */
+ let weaponCandidates=[];
+
+ for(const w of ownedW){
+  if(w.level<10){
+   weaponCandidates.push({
+    type:"weapon_up",
+    id:w.id,
+    name:w.name,
+    icon:w.icon,
+    current:w.level,
+    next:w.level+1,
+    desc:getWeaponUpgradeDescription(w)
+   });
   }
-  player.hp=Math.min(player.hp,player.maxHp);
-}
+ }
 
-/* =========================================================
-   ENEMY DEFINITIONS
-========================================================= */
-const enemyTypes=[
- {name:"スライム",hp:32,speed:55,r:11,damage:8,exp:2,coin:1,color:"#63df87"},
- {name:"ゴースト",hp:50,speed:85,r:12,damage:10,exp:3,coin:2,color:"#b891ff"},
- {name:"ビースト",hp:90,speed:70,r:15,damage:14,exp:4,coin:2,color:"#ff7868"},
- {name:"ナイト",hp:180,speed:48,r:18,damage:18,exp:6,coin:3,color:"#8da9d8"},
- {name:"デーモン",hp:350,speed:95,r:20,damage:22,exp:10,coin:5,color:"#e55a94"},
- {name:"タイタン",hp:900,speed:38,r:28,damage:30,exp:25,coin:12,color:"#ffae55"}
-];
-
-function enemyScale(){
-  return 1+game.time/260+game.level*.025;
-}
-
-function spawnEnemy(){
-  const side=randi(0,3);
-  let x,y;
-  const margin=100;
-  if(side===0){x=player.x+rand(-W,W);y=player.y-H/2-margin}
-  if(side===1){x=player.x+rand(-W,W);y=player.y+H/2+margin}
-  if(side===2){x=player.x-W/2-margin;y=player.y+rand(-H,H)}
-  if(side===3){x=player.x+W/2+margin;y=player.y+rand(-H,H)}
-
-  let typeIndex=0;
-  const t=game.time;
-  const roll=Math.random();
-  if(t>120&&roll>.7)typeIndex=1;
-  if(t>240&&roll>.72)typeIndex=2;
-  if(t>360&&roll>.76)typeIndex=3;
-  if(t>600&&roll>.80)typeIndex=4;
-  if(t>720&&roll>.92)typeIndex=5;
-
-  const d=enemyTypes[typeIndex];
-  const s=enemyScale();
-
-  enemies.push({
-    id:enemyId++,
-    x,y,
-    r:d.r,
-    hp:d.hp*s,
-    maxHp:d.hp*s,
-    speed:d.speed*(1+game.time/2400),
-    damage:d.damage,
-    exp:d.exp,
-    coin:d.coin,
-    color:d.color,
-    type:typeIndex,
-    hitFlash:0,
-    dead:false
-  });
-}
-
-/* =========================================================
-   BOSS
-========================================================= */
-function spawnBoss(){
-  const x=player.x+rand(-350,350);
-  const y=player.y+rand(-280,280);
-  const hp=18000+game.time*18+game.level*450;
-  const boss={
-    id:enemyId++,
-    x,y,r:62,
-    hp,maxHp:hp,
-    speed:35,
-    damage:35,
-    exp:250,
-    coin:150,
-    boss:true,
-    color:"#ff3e72",
-    hitFlash:0,
-    attackTimer:2.5,
-    phase:0
-  };
-  enemies.push(boss);
-  game.boss=boss;
-  document.getElementById("bossBar").style.display="block";
-  document.getElementById("bossName").textContent=
-    game.time>700?"終焉の王":"災厄の巨影";
-  announce(game.time>700?"FINAL BOSS":"BOSS INCOMING!", "巨大ボス出現");
-}
-
-/* =========================================================
-   TARGETING
-========================================================= */
-function nearestEnemy(){
-  let best=null,bd=Infinity;
-  for(const e of enemies){
-    if(e.dead)continue;
-    const d=(e.x-player.x)**2+(e.y-player.y)**2;
-    if(d<bd){bd=d;best=e}
-  }
-  return best;
-}
-function nearestEnemies(n){
-  return enemies.filter(e=>!e.dead)
-    .sort((a,b)=>
-      ((a.x-player.x)**2+(a.y-player.y)**2)-
-      ((b.x-player.x)**2+(b.y-player.y)**2)
-    ).slice(0,n);
-}
-
-/* =========================================================
-   DAMAGE / DEATH
-========================================================= */
-function dealDamage(e,dmg){
-  if(!e||e.dead)return;
-  const crit=chance(player.crit);
-  if(crit)dmg*=2;
-  e.hp-=dmg;
-  e.hitFlash=.08;
-  game.totalDamage+=dmg;
-
-  if(crit){
-    floatingText(e.x,e.y-20,"CRIT "+Math.floor(dmg),"#ffe76a",18);
-    burst(e.x,e.y,5,"#ffe76a",80);
-  }
-
-  if(e.hp<=0)killEnemy(e);
-}
-
-function killEnemy(e){
-  if(e.dead)return;
-  e.dead=true;
-  game.kills++;
-  game.combo++;
-  game.comboTimer=2.2;
-  game.maxCombo=Math.max(game.maxCombo,game.combo);
-
-  if(e.boss){
-    game.boss=null;
-    document.getElementById("bossBar").style.display="none";
-    for(let i=0;i<3;i++)burst(e.x,e.y,35,"#ff477a",250);
-    spawnChest(e.x,e.y);
-    floatingText(e.x,e.y-80,"BOSS DEFEATED!","#ffd45a",25);
-  }
-
-  const gemCount=e.boss?45:e.type>=4?5:1;
-  for(let i=0;i<gemCount;i++){
-    gems.push({
-      x:e.x+rand(-12,12),y:e.y+rand(-12,12),
-      vx:rand(-90,90),vy:rand(-90,90),
-      value:e.boss?8:e.exp*(e.type>=3?1.4:1),
-      r:e.boss?6:4,
-      life:20
+ if(ownedW.length<6){
+  for(const w of WEAPONS){
+   if(!ownedW.some(x=>x.id===w.id)){
+    weaponCandidates.push({
+     type:"weapon_new",
+     id:w.id,
+     name:w.name,
+     icon:w.icon,
+     current:0,
+     next:1,
+     desc:"新しい武器を獲得"
     });
+   }
   }
+ }
 
-  if(e.coin>0){
-    coins.push({
-      x:e.x,y:e.y,vx:rand(-50,50),vy:rand(-50,50),
-      value:Math.ceil(e.coin*player.coinGain),life:15
+ /*
+  道具:
+  6枠未満 → 新規 + 所持道具LvUP
+  6枠以上 → 所持道具LvUPのみ
+ */
+ let passiveCandidates=[];
+
+ for(const p of ownedP){
+  if(p.level<10){
+   passiveCandidates.push({
+    type:"passive_up",
+    id:p.id,
+    name:p.name,
+    icon:p.icon,
+    current:p.level,
+    next:p.level+1,
+    desc:getPassiveDescription(p)
+   });
+  }
+ }
+
+ if(ownedP.length<6){
+  for(const p of PASSIVES){
+   if(!ownedP.some(x=>x.id===p.id)){
+    passiveCandidates.push({
+     type:"passive_new",
+     id:p.id,
+     name:p.name,
+     icon:p.icon,
+     current:0,
+     next:1,
+     desc:"新しい道具を獲得"
     });
+   }
   }
+ }
 
-  burst(e.x,e.y,e.boss?25:5,e.boss?"#ff477a":e.color,e.boss?300:100);
+ /*
+  武器・道具を混ぜる。
+  ただし同一候補を重複させない。
+ */
+ let pool=[...weaponCandidates,...passiveCandidates];
 
-  if(game.combo===10||game.combo===25||game.combo===50||
-     game.combo===100||game.combo===250||game.combo===500||
-     game.combo===1000){
-    announce(game.combo.toLocaleString()+" KILLS","MASS KILL COMBO");
-  }
+ while(result.length<3 && pool.length){
+  const index=Math.floor(Math.random()*pool.length);
+  const c=pool.splice(index,1)[0];
+  if(used.has(c.id))continue;
+  used.add(c.id);
+  result.push(c);
+ }
+
+ /*
+  3択に足りない場合はステータス強化。
+ */
+ const stats=[
+  {id:"stat_attack",type:"stat",name:"攻撃力強化",icon:"⚔",desc:"攻撃力 +5"},
+  {id:"stat_speed",type:"stat",name:"攻撃速度強化",icon:"⏩",desc:"攻撃速度 +10%"},
+  {id:"stat_hp",type:"stat",name:"生命力強化",icon:"❤",desc:"最大HP +20 & HP回復"},
+  {id:"stat_move",type:"stat",name:"移動速度強化",icon:"👟",desc:"移動速度 +20"},
+  {id:"stat_crit",type:"stat",name:"会心強化",icon:"◉",desc:"クリティカル率 +5%"},
+  {id:"stat_exp",type:"stat",name:"経験値強化",icon:"★",desc:"経験値獲得量 +15%"}
+ ];
+
+ while(result.length<3){
+  result.push({...pick(stats)});
+ }
+
+ return result;
 }
 
-/* =========================================================
-   GEMS / COINS
-========================================================= */
-function updateDrops(dt){
-  for(let i=gems.length-1;i>=0;i--){
-    const g=gems[i];
-    g.x+=g.vx*dt;
-    g.y+=g.vy*dt;
-    g.vx*=Math.pow(.05,dt);
-    g.vy*=Math.pow(.05,dt);
-    g.life-=dt;
-
-    const dx=player.x-g.x,dy=player.y-g.y;
-    const d=Math.hypot(dx,dy);
-
-    if(d<player.magnet){
-      const s=650;
-      g.vx+=dx/d*s*dt;
-      g.vy+=dy/d*s*dt;
-    }
-
-    if(d<24){
-      game.exp+=g.value*player.expGain;
-      gems.splice(i,1);
-      checkLevelUp();
-    }else if(g.life<=0)gems.splice(i,1);
-  }
-
-  for(let i=coins.length-1;i>=0;i--){
-    const c=coins[i];
-    c.x+=c.vx*dt;c.y+=c.vy*dt;
-    c.vx*=.92;c.vy*=.92;c.life-=dt;
-    const d=Math.hypot(player.x-c.x,player.y-c.y);
-    if(d<player.magnet){
-      c.vx+=(player.x-c.x)*5*dt;
-      c.vy+=(player.y-c.y)*5*dt;
-    }
-    if(d<24){
-      game.coins+=c.value;
-      coins.splice(i,1);
-    }else if(c.life<=0)coins.splice(i,1);
-  }
+function getWeaponUpgradeDescription(w){
+ const lv=w.level+1;
+ if(lv===2)return"攻撃回数が増加";
+ if(lv===3)return"攻撃範囲が拡大";
+ if(lv===4)return"追加攻撃が発生";
+ if(lv===5)return"攻撃が強化される";
+ if(lv===6)return"攻撃範囲が大幅拡大";
+ if(lv===7)return"特殊効果が強化";
+ if(lv===8)return"大量の敵を攻撃";
+ if(lv===9)return"攻撃性能が極限強化";
+ if(lv===10)return"最終形態。進化可能";
+ return"武器LvUP";
 }
 
-/* =========================================================
-   LEVEL UP
-========================================================= */
-function checkLevelUp(){
-  while(game.exp>=game.nextExp&&game.level<999){
-    game.exp-=game.nextExp;
-    game.level++;
-    game.nextExp=Math.floor(20*Math.pow(1.16,game.level-1));
-    game.pendingLevels++;
-  }
-  if(game.pendingLevels>0&&!levelSelecting){
-    openLevelUp();
-  }
-}
-
-let levelSelecting=false;
-
-function getChoices(){
-  const choices=[];
-
-  const availableWeapons=Object.keys(weaponDefs)
-    .filter(id=>!weapons.some(w=>w.id===id));
-
-  const upgradeable=weapons.filter(w=>w.level<10);
-  const passiveChoices=Object.keys(passiveDefs)
-    .filter(id=>{
-      const p=passives.find(x=>x.id===id);
-      return !p||p.level<10;
-    });
-
-  for(let attempt=0;attempt<30&&choices.length<3;attempt++){
-    let category;
-
-    if(weapons.length<2&&availableWeapons.length&&attempt<8){
-      category="weapon";
-    }else{
-      category=chance(.55)?"weapon":"passive";
-    }
-
-    if(category==="weapon"&&availableWeapons.length){
-      const id=availableWeapons[randi(0,availableWeapons.length-1)];
-      if(!choices.some(c=>c.id===id)){
-        choices.push({
-          kind:"newWeapon",id,
-          name:weaponDefs[id].name,
-          icon:weaponDefs[id].icon,
-          desc:weaponDefs[id].desc,
-          lv:"NEW WEAPON"
-        });
-      }
-    }else if(category==="passive"&&passiveChoices.length){
-      const id=passiveChoices[randi(0,passiveChoices.length-1)];
-      if(!choices.some(c=>c.id===id)){
-        const p=passives.find(x=>x.id===id);
-        choices.push({
-          kind:"passive",id,
-          name:passiveDefs[id].name,
-          icon:passiveDefs[id].icon,
-          desc:passiveDefs[id].desc,
-          lv:p?`Lv.${p.level} → Lv.${p.level+1}`:"NEW PASSIVE"
-        });
-      }
-    }else if(upgradeable.length){
-      const w=upgradeable[randi(0,upgradeable.length-1)];
-      if(!choices.some(c=>c.id===w.id)){
-        choices.push({
-          kind:"weaponUpgrade",id:w.id,
-          name:weaponDefs[w.id].name,
-          icon:weaponDefs[w.id].icon,
-          desc:weaponDefs[w.id].desc,
-          lv:`Lv.${w.level} → Lv.${w.level+1}`
-        });
-      }
-    }
-  }
-
-  while(choices.length<3){
-    choices.push({
-      kind:"heal",id:"heal"+choices.length,
-      name:"完全回復",icon:"♥",
-      desc:"HPを最大まで回復する。",
-      lv:"RECOVERY"
-    });
-  }
-
-  return choices;
+function getPassiveDescription(p){
+ const lv=p.level+1;
+ return `${p.name}の効果がLv${lv}へ強化`;
 }
 
 function openLevelUp(){
-  if(game.pendingLevels<=0)return;
-  levelSelecting=true;
-  game.paused=true;
+ game.paused=true;
+ const box=document.getElementById("choices");
+ box.innerHTML="";
+ const choices=generateChoices();
 
-  const panel=document.getElementById("levelUp");
-  const cards=document.getElementById("cards");
-  cards.innerHTML="";
+ for(const c of choices){
+  const el=document.createElement("div");
+  el.className="choice";
 
-  for(const c of getChoices()){
-    const el=document.createElement("div");
-    el.className="card "+(c.kind==="passive"?"passive":"weapon");
-    el.innerHTML=`
-      <div class="cardIcon">${c.icon}</div>
-      <div class="cardName">${c.name}</div>
-      <div class="cardType">${c.kind==="newWeapon"?"WEAPON":"UPGRADE"}</div>
-      <div class="cardDesc">${c.desc}</div>
-      <div class="cardLv">${c.lv}</div>
-    `;
-    el.onclick=()=>chooseUpgrade(c);
-    cards.appendChild(el);
+  let lv="";
+  if(c.type==="weapon_up"||c.type==="passive_up"){
+   lv=`<div class="lv">Lv.${c.current} → Lv.${c.next}</div>`;
+  }else if(c.type==="weapon_new"||c.type==="passive_new"){
+   lv=`<div class="lv">NEW → Lv.1</div>`;
   }
 
-  panel.classList.add("open");
+  el.innerHTML=`
+   <div class="icon">${c.icon}</div>
+   <div class="rarity">${
+    c.type.includes("new")?"NEW":
+    c.type.includes("up")?"UPGRADE":"POWER UP"
+   }</div>
+   <h2>${c.name}</h2>
+   ${lv}
+   <div class="desc">${c.desc}</div>
+  `;
+
+  el.onclick=()=>applyChoice(c);
+  box.appendChild(el);
+ }
+
+ document.getElementById("levelup").style.display="flex";
 }
 
-function chooseUpgrade(c){
-  if(c.kind==="newWeapon"){
-    addWeapon(c.id);
-    floatingText(player.x,player.y-50,weaponDefs[c.id].name+" GET!","#7deaff",20);
-  }else if(c.kind==="weaponUpgrade"){
-    const w=weapons.find(x=>x.id===c.id);
-    if(w){
-      w.level=Math.min(10,w.level+1);
-      floatingText(player.x,player.y-50,w.name+" Lv."+w.level,"#ffe06a",20);
-
-      if(w.level===10){
-        const evo=evolutions[w.id];
-        if(evo){
-          announce("EVOLUTION READY","ボスの宝箱で進化可能");
-        }
-      }
-    }
-  }else if(c.kind==="passive"){
-    addPassive(c.id);
-  }else if(c.kind==="heal"){
-    player.hp=player.maxHp;
+function applyChoice(c){
+ if(c.type==="weapon_new"){
+  if(player.weapons.length<6 && !player.weapons.some(w=>w.id===c.id)){
+   player.weapons.push(makeWeapon(c.id));
   }
+ }
 
-  game.pendingLevels--;
-  updateWeaponUI();
-  updatePassiveUI();
+ if(c.type==="weapon_up"){
+  const w=player.weapons.find(w=>w.id===c.id);
+  if(w)w.level=Math.min(10,w.level+1);
+ }
 
-  if(game.pendingLevels>0){
-    openLevelUp();
-  }else{
-    levelSelecting=false;
-    game.paused=false;
-    document.getElementById("levelUp").classList.remove("open");
+ if(c.type==="passive_new"){
+  if(player.passives.length<6 && !player.passives.some(p=>p.id===c.id)){
+   player.passives.push(makePassive(c.id));
   }
+ }
+
+ if(c.type==="passive_up"){
+  const p=player.passives.find(p=>p.id===c.id);
+  if(p)p.level=Math.min(10,p.level+1);
+ }
+
+ if(c.type==="stat"){
+  if(c.id==="stat_attack")player.attack+=5;
+  if(c.id==="stat_speed")player.attackSpeed+=.1;
+  if(c.id==="stat_hp"){
+   player.maxHp+=20;
+   player.hp+=20;
+  }
+  if(c.id==="stat_move")player.moveSpeed+=20;
+  if(c.id==="stat_crit")player.crit+=.05;
+  if(c.id==="stat_exp")player.expGain+=.15;
+ }
+
+ recalcStats();
+ document.getElementById("levelup").style.display="none";
+ game.paused=false;
+ updateUI();
 }
 
 /* =========================================================
-   TREASURE CHEST
+   EXPERIENCE
 ========================================================= */
-let chests=[];
+
+function gainExp(amount){
+ player.exp+=amount*player.expGain;
+
+ while(player.exp>=player.nextExp && player.level<999){
+  player.exp-=player.nextExp;
+  player.level++;
+  player.nextExp=Math.floor(20*Math.pow(player.level,1.17));
+  flashMessage("LEVEL UP","#65edff");
+  setTimeout(()=>{
+   if(game.running)openLevelUp();
+  },180);
+  break;
+ }
+
+ if(player.level>=999){
+  player.exp=player.nextExp;
+ }
+}
+
+/* =========================================================
+   ENEMIES
+========================================================= */
+
+function spawnEnemy(boss=false){
+ const side=randi(0,3);
+ let x,y;
+
+ if(side===0){x=rand(-50,W+50);y=-50}
+ if(side===1){x=W+50;y=rand(-50,H+50)}
+ if(side===2){x=rand(-50,W+50);y=H+50}
+ if(side===3){x=-50;y=rand(-50,H+50)}
+
+ const scale=1+game.time/500;
+ const elite=Math.random()<Math.min(.1,game.time/3000);
+
+ const hp=(boss?9000:elite?180:35)*scale;
+
+ game.enemies.push({
+  x,y,
+  r:boss?32:elite?15:9,
+  hp,maxHp:hp,
+  speed:boss?35:elite?70:rand(65,105),
+  damage:boss?20:elite?10:5,
+  elite,boss,
+  hit:0,
+  dead:false
+ });
+}
+
+function enemyDeath(e){
+ if(e.dead)return;
+ e.dead=true;
+ game.kills++;
+ game.combo++;
+ game.comboTimer=2.5;
+
+ const gemCount=e.boss?35:e.elite?4:1;
+ for(let i=0;i<gemCount;i++){
+  game.gems.push({
+   x:e.x+rand(-10,10),
+   y:e.y+rand(-10,10),
+   r:e.boss?5:3,
+   value:e.boss?10:e.elite?3:1,
+   vx:rand(-40,40),vy:rand(-40,40)
+  });
+ }
+
+ if(e.boss){
+  spawnChest(e.x,e.y);
+  burst(e.x,e.y,"#ffe36a",80,350);
+  flashMessage("BOSS DEFEATED","#ffe36a");
+ }else{
+  burst(e.x,e.y,e.elite?"#ffbd57":"#8bdcff",e.elite?14:5,e.elite?150:70);
+ }
+
+ if(game.kills===100||game.kills===500||game.kills===1000||game.kills===2000){
+  flashMessage(`${game.kills} KILLS!`,"#ffef74");
+ }
+}
+
+/* =========================================================
+   CHEST
+========================================================= */
 
 function spawnChest(x,y){
-  chests.push({
-    x,y,
-    r:18,
-    pulse:0,
-    opened:false
-  });
+ game.chest={x,y,opened:false,pulse:0};
 }
 
-function updateChests(){
-  for(let i=chests.length-1;i>=0;i--){
-    const c=chests[i];
-    c.pulse+=.06;
+document.getElementById("chestCard").onclick=()=>{
+ if(!game.chest)return;
 
-    if(!c.opened&&Math.hypot(player.x-c.x,player.y-c.y)<65){
-      c.opened=true;
-      openChest(c);
-      chests.splice(i,1);
-    }
+ const w=player.weapons.find(w=>w.level>=10&&!w.evolution &&
+  player.passives.some(p=>p.id===w.passive&&p.level>=10)
+ );
+
+ if(w){
+  w.evolution=true;
+  game.chest.opened=true;
+  document.getElementById("chest").style.display="none";
+
+  const old=w.name;
+  w.name=w.evo;
+
+  flashMessage("EVOLUTION!","#d28cff");
+  burst(player.x,player.y,"#d28cff",180,600);
+
+  for(const e of game.enemies){
+   if(Math.hypot(e.x-player.x,e.y-player.y)<360){
+    e.hp-=w.level*120;
+    if(e.hp<=0)enemyDeath(e);
+   }
   }
-}
-
-function openChest(c){
-  const evolvable=weapons.filter(w=>
-    w.level>=10&&!w.evolved&&evolutions[w.id]
-  );
-
-  if(evolvable.length){
-    const w=evolvable[randi(0,evolvable.length-1)];
-    w.evolved=true;
-
-    announce("EVOLUTION!",""+evolutions[w.id].name);
-    game.shake=25;
-
-    for(let i=0;i<5;i++){
-      setTimeout(()=>{
-        burst(player.x,player.y,30,"#dfffff",450);
-      },i*100);
-    }
-
-    floatingText(player.x,player.y-90,
-      weaponDefs[w.id].name+" → "+evolutions[w.id].name,
-      "#fff08a",22);
-  }else{
-    const bonus=500;
-    game.coins+=bonus;
-    announce("TREASURE!","COIN +"+bonus);
-    burst(c.x,c.y,40,"#ffd34d",400);
-  }
-}
+ }else{
+  game.chest.opened=true;
+  document.getElementById("chest").style.display="none";
+  gainExp(80);
+  game.coins+=100;
+  flashMessage("TREASURE!","#ffe36a");
+ }
+};
 
 /* =========================================================
-   ATTACK ENGINE
+   ATTACK SYSTEM
 ========================================================= */
-function updateWeapons(dt){
-  for(const w of weapons){
-    w.cooldown-=dt;
-    if(w.cooldown<=0){
-      fireWeapon(w);
-      w.cooldown=weaponCooldown(w);
-    }
-  }
+
+function nearestEnemy(x,y,max=Infinity){
+ let best=null,bd=max;
+ for(const e of game.enemies){
+  if(e.dead)continue;
+  const d=Math.hypot(e.x-x,e.y-y);
+  if(d<bd){bd=d;best=e}
+ }
+ return best;
 }
 
-function fireWeapon(w){
-  if(w.evolved){
-    fireEvolution(w);
-    return;
-  }
-  const def=weaponDefs[w.id];
-  if(def&&def.fire)def.fire(w);
+function damageEnemy(e,dmg){
+ if(!e||e.dead)return;
+
+ let critical=Math.random()<player.crit;
+ let final=dmg*(critical?player.critMult:1);
+
+ e.hp-=final;
+ e.hit=.08;
+
+ if(critical)addText(e.x,e.y-12,`CRIT ${Math.floor(final)}`,"#ffe36a",14);
+ else if(Math.random()<.18)addText(e.x,e.y,`${Math.floor(final)}`,"#fff",11);
+
+ if(e.hp<=0)enemyDeath(e);
 }
 
-function fireEvolution(w){
-  const id=w.id;
-  const evo=evolutions[id];
+function attackWeapon(w){
+ const lv=w.level;
+ const dmg=player.attack*(1+lv*.55);
+ const target=nearestEnemy(player.x,player.y,700);
 
-  if(id==="starBlade"){
-    attacks.push({kind:"evoRing",x:player.x,y:player.y,life:1.3,max:1.3,
-      r:30,maxR:250,damage:weaponDamage(w)*1.7,hit:new Set()});
-  }
-  else if(id==="fireball"){
-    const e=nearestEnemy()||player;
-    attacks.push({kind:"evoFire",x:e.x,y:e.y,life:1.1,max:1.1,
-      r:40,damage:weaponDamage(w)*2.2,hit:new Set()});
-  }
-  else if(id==="thunder"){
-    const ts=nearestEnemies(15);
-    ts.forEach((e,i)=>{
-      attacks.push({kind:"evoThunder",x:e.x,y:e.y,life:.65+i*.025,
-        max:.65+i*.025,damage:weaponDamage(w)*2.3,target:e});
+ switch(w.type){
+
+  case"orbit":{
+   const count=Math.min(4,1+Math.floor(lv/3));
+   for(let i=0;i<count;i++){
+    const a=w.angle+i*Math.PI*2/count;
+    const radius=45+lv*6;
+    game.attacks.push({
+     kind:"blade",x:player.x+Math.cos(a)*radius,y:player.y+Math.sin(a)*radius,
+     a,life:.22,max:.22,r:12+lv*1.2,
+     dmg,hit:new Set(),color:"#8cecff"
     });
-  }
-  else if(id==="meteor"){
-    for(let i=0;i<5;i++){
-      attacks.push({kind:"evoMeteor",
-        x:player.x+rand(-350,350),y:player.y+rand(-280,280),
-        life:rand(.5,1.2),max:1.2,damage:weaponDamage(w)*2,r:70});
-    }
-  }
-  else if(id==="gravity"){
-    attacks.push({kind:"evoGravity",x:player.x,y:player.y,
-      life:2.5,max:2.5,r:220,damage:weaponDamage(w)*2.4});
-  }
-  else if(id==="voidCannon"){
-    attacks.push({kind:"evoVoid",x:player.x,y:player.y,
-      life:1.8,max:1.8,a:nearestEnemy()?angleTo(player,nearestEnemy()):0,
-      damage:weaponDamage(w)*2.5,length:900});
-  }
-  else if(id==="iceSpear"){
-    for(let i=0;i<3;i++){
-      attacks.push({kind:"evoIce",x:player.x,y:player.y,
-        life:.7,max:.7,a:i*TAU/3,damage:weaponDamage(w)*2});
-    }
-  }
-  else if(id==="shadowBurial"){
-    const ts=nearestEnemies(25);
-    ts.forEach(e=>attacks.push({kind:"evoShadow",x:e.x,y:e.y,
-      life:.7,max:.7,damage:weaponDamage(w)*2}));
-  }
-  else if(id==="lightRing"){
-    attacks.push({kind:"evoLight",x:player.x,y:player.y,
-      life:1.5,max:1.5,r:250,damage:weaponDamage(w)*2,hit:new Set()});
-  }
-  else if(id==="endWave"){
-    for(let i=0;i<3;i++){
-      attacks.push({kind:"evoWave",x:player.x,y:player.y,
-        life:1.2,max:1.2,r:i*30,maxR:500+i*80,
-        damage:weaponDamage(w)*1.5,hit:new Set()});
-    }
-  }
-  else if(id==="axe"){
-    for(let i=0;i<3;i++){
-      attacks.push({kind:"evoAxe",x:player.x,y:player.y,
-        life:1,max:1,a:i*TAU/3,damage:weaponDamage(w)*1.8});
-    }
-  }
-  else if(id==="starCore"){
-    attacks.push({kind:"evoStar",x:player.x,y:player.y,
-      life:1.5,max:1.5,r:40,maxR:320,damage:weaponDamage(w)*2,hit:new Set()});
-  }
-  else if(id==="bomb"){
-    attacks.push({kind:"evoBomb",x:player.x,y:player.y,
-      life:1.5,max:1.5,r:50,maxR:300,damage:weaponDamage(w)*2,hit:new Set()});
-  }
-  else if(id==="voidGate"){
-    attacks.push({kind:"evoGate",x:player.x,y:player.y,
-      life:3,max:3,r:230,damage:weaponDamage(w)*1.8});
-  }
-  else if(id==="phantomBlade"){
-    attacks.push({kind:"evoPhantom",x:player.x,y:player.y,
-      life:1,max:1,n:20,damage:weaponDamage(w)*1.7});
-  }
-  else if(id==="orbitFire"){
-    attacks.push({kind:"evoOrbit",x:player.x,y:player.y,
-      life:2,max:2,n:12,damage:weaponDamage(w)*1.3});
-  }
-  else if(id==="laserRain"){
-    for(let i=0;i<30;i++)attacks.push({
-      kind:"evoRain",x:player.x+rand(-500,500),y:player.y+rand(-350,350),
-      life:rand(.3,1),max:1,damage:weaponDamage(w)*1.3
-    });
-  }
-  else if(id==="bladeStorm"){
-    attacks.push({kind:"evoStorm",x:player.x,y:player.y,
-      life:1.5,max:1.5,r:50,maxR:330,damage:weaponDamage(w)*1.5,hit:new Set()});
-  }
-  else if(id==="plasma"){
-    for(let i=0;i<4;i++)attacks.push({
-      kind:"evoPlasma",x:player.x,y:player.y,a:i*TAU/4,
-      life:1,max:1,damage:weaponDamage(w)*1.7,length:700
-    });
-  }
-  else if(id==="moonAxe"){
-    attacks.push({kind:"evoMoon",x:player.x,y:player.y,
-      life:1.3,max:1.3,r:280,damage:weaponDamage(w)*2});
-  }
-  else if(id==="frostNova"){
-    attacks.push({kind:"evoFrost",x:player.x,y:player.y,
-      life:1.5,max:1.5,r:20,maxR:330,damage:weaponDamage(w)*2,hit:new Set()});
-  }
-  else if(id==="soulSpear"){
-    attacks.push({kind:"evoSoul",x:player.x,y:player.y,
-      life:2,max:2,damage:weaponDamage(w)*2.4});
-  }
-  else if(id==="storm"){
-    attacks.push({kind:"evoStormCloud",x:player.x,y:player.y,
-      life:3,max:3,r:260,damage:weaponDamage(w)*1.5});
-  }
-  else if(id==="meteorRain"){
-    for(let i=0;i<30;i++)attacks.push({
-      kind:"evoMeteorRain",
-      x:player.x+rand(-500,500),y:player.y+rand(-350,350),
-      life:rand(.3,1.3),max:1.3,damage:weaponDamage(w)*1.4,r:45
-    });
-  }
-  else if(id==="crossSlash"){
-    attacks.push({kind:"evoCross",x:player.x,y:player.y,
-      life:1,max:1,damage:weaponDamage(w)*2,len:650});
-  }
-  else if(id==="energyOrb"){
-    attacks.push({kind:"evoOrb",x:player.x,y:player.y,
-      life:3,max:3,damage:weaponDamage(w)*1.8,r:18});
-  }
-  else if(id==="sunBurst"){
-    attacks.push({kind:"evoSun",x:player.x,y:player.y,
-      life:2,max:2,r:30,maxR:430,damage:weaponDamage(w)*2.5,hit:new Set()});
-  }
-  else if(id==="phantomRain"){
-    for(let i=0;i<35;i++)attacks.push({
-      kind:"evoPhantomRain",
-      x:player.x+rand(-500,500),y:player.y+rand(-350,350),
-      life:rand(.2,1),max:1,damage:weaponDamage(w)*1.5
-    });
-  }
-  else if(id==="chainLightning"){
-    attacks.push({kind:"evoChain",targets:nearestEnemies(30),life:1,max:1,
-      damage:weaponDamage(w)*1.7});
-  }
-  else if(id==="bladeCannon"){
-    attacks.push({kind:"evoBladeCannon",x:player.x,y:player.y,
-      life:1.5,max:1.5,a:nearestEnemy()?angleTo(player,nearestEnemy()):0,
-      damage:weaponDamage(w)*2.8,length:1200});
-  }
-  else if(id==="blackSun"){
-    attacks.push({kind:"evoBlackSun",x:player.x,y:player.y,
-      life:3,max:3,r:40,damage:weaponDamage(w)*2});
-  }
-  else if(id==="infinity"){
-    attacks.push({kind:"evoInfinity",x:player.x,y:player.y,
-      life:2,max:2,r:100,maxR:420,damage:weaponDamage(w)*2,hit:new Set()});
-  }
-  else if(id==="finalRay"){
-    attacks.push({kind:"evoFinalRay",x:player.x,y:player.y,
-      life:2,max:2,a:nearestEnemy()?angleTo(player,nearestEnemy()):0,
-      damage:weaponDamage(w)*3,length:1500});
+   }
+   w.angle+=.4+lv*.04;
+   break;
   }
 
-  announce(evo.name,"EVOLUTION");
-  game.shake=18;
+  case"lightning":{
+   if(!target)return;
+   const chain=Math.min(1+Math.floor(lv/2),8);
+   let hit=target;
+   const seen=new Set();
+
+   for(let i=0;i<chain&&hit;i++){
+    if(seen.has(hit))break;
+    seen.add(hit);
+    damageEnemy(hit,dmg*1.3);
+    game.attacks.push({
+     kind:"bolt",x:hit.x,y:hit.y,life:.16,max:.16,r:40,
+     color:"#fff36b"
+    });
+    hit=nearestEnemy(hit.x,hit.y,120);
+   }
+   break;
+  }
+
+  case"meteor":{
+   const count=lv>=8?5:lv>=5?3:1;
+   for(let i=0;i<count;i++){
+    const tx=target?target.x+rand(-80,80):player.x+rand(-250,250);
+    const ty=target?target.y+rand(-80,80):player.y+rand(-250,250);
+    game.attacks.push({
+     kind:"meteor",x:tx,y:ty,life:.65,max:.65,
+     dmg:dmg*2.2,r:20+lv*2
+    });
+   }
+   break;
+  }
+
+  case"gravity":{
+   const t=target||{x:player.x,y:player.y};
+   game.attacks.push({
+    kind:"gravity",x:t.x,y:t.y,life:.8,max:.8,
+    r:45+lv*7,dmg:dmg*1.5
+   });
+   break;
+  }
+
+  case"laser":{
+   const t=target||{x:player.x+Math.cos(w.angle)*500,y:player.y+Math.sin(w.angle)*500};
+   const a=Math.atan2(t.y-player.y,t.x-player.x);
+   game.attacks.push({
+    kind:"laser",x:player.x,y:player.y,a,
+    life:.3,max:.3,len:400+lv*35,
+    width:8+lv*1.5,dmg:dmg*1.7
+   });
+   w.angle=a;
+   break;
+  }
+
+  case"fire":{
+   const t=target||{x:player.x+rand(-200,200),y:player.y+rand(-200,200)};
+   game.attacks.push({
+    kind:"explosion",x:t.x,y:t.y,life:.35,max:.35,
+    r:35+lv*6,dmg:dmg*2
+   });
+   break;
+  }
+
+  case"ice":{
+   const a=target?Math.atan2(target.y-player.y,target.x-player.x):Math.random()*6.28;
+   game.attacks.push({
+    kind:"spear",x:player.x,y:player.y,a,life:.35,max:.35,
+    len:450+lv*25,width:14+lv*1.4,dmg:dmg*2
+   });
+   break;
+  }
+
+  case"shadow":{
+   if(!target)return;
+   game.attacks.push({
+    kind:"shadow",x:target.x,y:target.y,life:.25,max:.25,
+    r:30+lv*3,dmg:dmg*2.5
+   });
+   break;
+  }
+
+  case"halo":{
+   game.attacks.push({
+    kind:"halo",x:player.x,y:player.y,life:.45,max:.45,
+    r:75+lv*8,dmg:dmg*1.3,hit:new Set()
+   });
+   break;
+  }
+
+  case"wave":{
+   game.attacks.push({
+    kind:"wave",x:player.x,y:player.y,life:.5,max:.5,
+    r:25,maxR:220+lv*25,dmg:dmg*1.7,hit:new Set()
+   });
+   break;
+  }
+
+  case"axe":{
+   const a=target?Math.atan2(target.y-player.y,target.x-player.x):Math.random()*6.28;
+   game.attacks.push({
+    kind:"axe",x:player.x,y:player.y,a,life:.5,max:.5,
+    r:40+lv*4,dmg:dmg*2.2
+   });
+   break;
+  }
+
+  case"core":{
+   for(let i=0;i<Math.min(5,1+Math.floor(lv/2));i++){
+    const a=Math.random()*6.28;
+    game.attacks.push({
+     kind:"core",x:player.x+Math.cos(a)*30,y:player.y+Math.sin(a)*30,
+     vx:Math.cos(a)*180,vy:Math.sin(a)*180,
+     life:1,max:1,r:10+lv,dmg:dmg
+    });
+   }
+   break;
+  }
+
+  case"bomb":{
+   const t=target||{x:player.x,y:player.y};
+   game.attacks.push({
+    kind:"bomb",x:t.x,y:t.y,life:.55,max:.55,
+    r:25+lv*7,dmg:dmg*2
+   });
+   break;
+  }
+
+  case"blackhole":{
+   const t=target||player;
+   game.attacks.push({
+    kind:"blackhole",x:t.x,y:t.y,life:1,max:1,
+    r:50+lv*5,dmg:dmg*.5
+   });
+   break;
+  }
+
+  case"phantom":{
+   const count=Math.min(6,2+Math.floor(lv/2));
+   for(let i=0;i<count;i++){
+    const t=nearestEnemy(player.x,player.y,700);
+    if(!t)break;
+    damageEnemy(t,dmg*1.5);
+    game.attacks.push({
+     kind:"slash",x:t.x,y:t.y,a:Math.random()*6.28,
+     life:.2,max:.2,r:35
+    });
+   }
+   break;
+  }
+
+  default:{
+   if(target)damageEnemy(target,dmg);
+   game.attacks.push({
+    kind:"hit",x:target?target.x:player.x,y:target?target.y:player.y,
+    life:.18,max:.18,r:20+lv*2
+   });
+  }
+ }
 }
 
 /* =========================================================
    ATTACK UPDATE
 ========================================================= */
+
 function updateAttacks(dt){
-  for(let i=attacks.length-1;i>=0;i--){
-    const a=attacks[i];
-    a.life-=dt;
-
-    switch(a.kind){
-
-      case"blade":
-        a.a+=dt*1.2;
-        damageArc(a,a.radius,a.a,a.width*.018);
-        break;
-
-      case"fireball":
-        a.x+=a.vx*dt;a.y+=a.vy*dt;
-        if(a.life<.25) explodeAttack(a.x,a.y,70,a.damage,a.hit);
-        hitCircle(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"thunder":
-        if(!a.hit&&a.life<.18){
-          a.hit=true;
-          if(a.target&&!a.target.dead){
-            dealDamage(a.target,a.damage);
-            shock(a.x,a.y,55,a.damage*.4,"#eee5ff");
-          }
-        }
-        break;
-
-      case"meteor":
-        if(a.life<.18)explodeAttack(a.x,a.y,a.r,a.damage);
-        break;
-
-      case"gravity":
-        gravityDamage(a.x,a.y,a.r,a.damage,dt);
-        break;
-
-      case"voidCannon":
-        if(a.life<.45){
-          lineDamage(player.x,player.y,a.a,a.length,30,a.damage);
-        }
-        break;
-
-      case"iceSpear":
-        lineDamage(player.x,player.y,a.a,a.length,32,a.damage);
-        break;
-
-      case"shadow":
-        if(a.life<.3&&!a.hit){
-          a.hit=true;
-          if(a.target&&!a.target.dead)dealDamage(a.target,a.damage);
-        }
-        break;
-
-      case"lightRing":
-        ringDamage(a.x,a.y,a.radius,a.damage,a.a);
-        break;
-
-      case"endWave":
-        a.r=lerp(15, a.maxR, 1-a.life/a.max);
-        radialDamage(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"axe":
-        const axProgress=1-a.life/a.max;
-        const side=Math.sin(axProgress*Math.PI);
-        lineDamage(
-          player.x+Math.cos(a.a)*(-a.length/2+ a.length*axProgress),
-          player.y+Math.sin(a.a)*(-a.length/2+ a.length*axProgress),
-          a.a,130,30,a.damage,a.hit
-        );
-        break;
-
-      case"starCore":
-        a.a+=dt*4;
-        a.x=player.x;
-        a.y=player.y;
-        hitCircle(
-          player.x+Math.cos(a.a)*110,
-          player.y+Math.sin(a.a)*110,
-          a.r,a.damage,a.hit
-        );
-        break;
-
-      case"bomb":
-        if(a.life<.25)explodeAttack(a.x,a.y,a.r,a.damage);
-        break;
-
-      case"voidGate":
-        gravityDamage(a.x,a.y,a.r,a.damage*.4,dt);
-        break;
-
-      case"phantom":
-        if(a.life<.25){
-          lineDamage(player.x,player.y,a.a,a.len,20,a.damage);
-        }
-        break;
-
-      case"orbitFire":
-        orbitDamage(a,dt);
-        break;
-
-      case"rainLaser":
-        if(a.life<.15)hitCircle(a.x,a.y,35,a.damage);
-        break;
-
-      case"bladeStorm":
-        a.a+=dt*7;
-        lineDamage(player.x,player.y,a.a,a.len,15,a.damage);
-        break;
-
-      case"plasma":
-        a.x+=a.vx*dt;a.y+=a.vy*dt;
-        hitCircle(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"moonAxe":
-        a.a+=dt*3;
-        lineDamage(player.x,player.y,a.a, a.len,35,a.damage);
-        break;
-
-      case"frostNova":
-        a.r=lerp(20,a.maxR,1-a.life/a.max);
-        radialDamage(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"soulSpear":
-        const se=nearestEnemyTo(a);
-        if(se&&!se.dead){
-          const aa=angleTo(a,se);
-          a.vx=lerp(a.vx,Math.cos(aa)*560,dt*4);
-          a.vy=lerp(a.vy,Math.sin(aa)*560,dt*4);
-        }
-        a.x+=a.vx*dt;a.y+=a.vy*dt;
-        hitCircle(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"storm":
-        gravityDamage(a.x,a.y,a.r,a.damage,dt);
-        break;
-
-      case"smallMeteor":
-        if(a.life<.12)explodeAttack(a.x,a.y,a.r,a.damage);
-        break;
-
-      case"crossSlash":
-        lineDamage(a.x,a.y,0,a.len,24,a.damage,a.hit);
-        lineDamage(a.x,a.y,Math.PI/2,a.len,24,a.damage,a.hit);
-        break;
-
-      case"energyOrb":
-        const ee=nearestEnemyTo(a);
-        if(ee){
-          const aa=angleTo(a,ee);
-          a.vx=lerp(a.vx,Math.cos(aa)*360,dt*2);
-          a.vy=lerp(a.vy,Math.sin(aa)*360,dt*2);
-        }
-        a.x+=a.vx*dt;a.y+=a.vy*dt;
-        if(hitCircle(a.x,a.y,a.r,a.damage,a.hit)){
-          explodeAttack(a.x,a.y,75,a.damage*.7);
-        }
-        break;
-
-      case"sunBurst":
-        a.r=lerp(30,a.maxR,1-a.life/a.max);
-        radialDamage(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"phantomRain":
-        if(a.life<.12)hitCircle(a.x,a.y,25,a.damage);
-        break;
-
-      case"chainLightning":
-        updateChain(a);
-        break;
-
-      case"bladeCannon":
-        lineDamage(a.x,a.y,a.a,a.length,35,a.damage);
-        break;
-
-      case"blackSun":
-        gravityDamage(a.x,a.y,a.r,a.damage,dt);
-        a.r=Math.min(280,a.r+110*dt);
-        break;
-
-      case"infinity":
-        a.r=lerp(100,a.maxR,1-a.life/a.max);
-        ringDamage(a.x,a.y,a.r,a.damage,a.r);
-        break;
-
-      case"finalRay":
-        lineDamage(a.x,a.y,a.a,a.length,50,a.damage);
-        break;
-
-      /* EVOLUTIONS */
-
-      case"evoRing":
-        a.r=lerp(30,a.maxR,1-a.life/a.max);
-        radialDamage(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"evoFire":
-        a.r=lerp(40,260,1-a.life/a.max);
-        radialDamage(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"evoThunder":
-        if(a.life<.22&&!a.hit){
-          a.hit=true;
-          if(a.target&&!a.target.dead)dealDamage(a.target,a.damage);
-          shock(a.x,a.y,90,a.damage,"#fff");
-        }
-        break;
-
-      case"evoMeteor":
-        if(a.life<.15)explodeAttack(a.x,a.y,a.r,a.damage);
-        break;
-
-      case"evoGravity":
-        gravityDamage(a.x,a.y,a.r,a.damage,dt);
-        break;
-
-      case"evoVoid":
-        lineDamage(a.x,a.y,a.a,a.length,55,a.damage);
-        break;
-
-      case"evoIce":
-        lineDamage(a.x,a.y,a.a,800,48,a.damage);
-        break;
-
-      case"evoShadow":
-        if(a.life<.25&&!a.hit){
-          a.hit=true;
-          hitCircle(a.x,a.y,65,a.damage);
-          burst(a.x,a.y,10,"#a06dff",180);
-        }
-        break;
-
-      case"evoLight":
-        ringDamage(a.x,a.y,a.r,a.damage,game.time*5);
-        break;
-
-      case"evoWave":
-        a.r=lerp(0,a.maxR,1-a.life/a.max);
-        radialDamage(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"evoAxe":
-        a.a+=dt*4;
-        lineDamage(a.x,a.y,a.a,a.r,50,a.damage);
-        break;
-
-      case"evoStar":
-        a.r=lerp(40,a.maxR,1-a.life/a.max);
-        radialDamage(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"evoBomb":
-        a.r=lerp(50,a.maxR,1-a.life/a.max);
-        radialDamage(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"evoGate":
-        gravityDamage(a.x,a.y,a.r,a.damage,dt);
-        break;
-
-      case"evoPhantom":
-        for(let k=0;k<6;k++){
-          const aa=game.time*3+k*TAU/6;
-          lineDamage(a.x,a.y,aa,220,25,a.damage);
-        }
-        break;
-
-      case"evoOrbit":
-        for(let k=0;k<a.n;k++){
-          const aa=game.time*3+k*TAU/a.n;
-          hitCircle(
-            player.x+Math.cos(aa)*170,
-            player.y+Math.sin(aa)*170,
-            18,a.damage
-          );
-        }
-        break;
-
-      case"evoRain":
-        if(a.life<.1)hitCircle(a.x,a.y,50,a.damage);
-        break;
-
-      case"evoStorm":
-        a.r=lerp(50,a.maxR,1-a.life/a.max);
-        radialDamage(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"evoPlasma":
-        lineDamage(player.x,player.y,a.a,a.length,30,a.damage);
-        break;
-
-      case"evoMoon":
-        a.r=lerp(30,a.r,1-a.life/a.max);
-        for(let k=0;k<4;k++){
-          lineDamage(a.x,a.y,game.time*2+k*Math.PI/2,a.r,50,a.damage);
-        }
-        break;
-
-      case"evoFrost":
-        a.r=lerp(20,a.maxR,1-a.life/a.max);
-        radialDamage(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"evoSoul":
-        for(let k=0;k<4;k++){
-          const aa=game.time*2+k*TAU/4;
-          lineDamage(a.x,a.y,aa,700,32,a.damage);
-        }
-        break;
-
-      case"evoStormCloud":
-        gravityDamage(a.x,a.y,a.r,a.damage,dt);
-        if(chance(dt*12)){
-          const e=nearestEnemy();
-          if(e)dealDamage(e,a.damage);
-        }
-        break;
-
-      case"evoMeteorRain":
-        if(a.life<.1)explodeAttack(a.x,a.y,a.r,a.damage);
-        break;
-
-      case"evoCross":
-        for(let k=0;k<4;k++){
-          lineDamage(a.x,a.y,k*Math.PI/4,a.len,35,a.damage);
-        }
-        break;
-
-      case"evoOrb":
-        a.x=player.x+Math.cos(game.time*2)*180;
-        a.y=player.y+Math.sin(game.time*2)*180;
-        hitCircle(a.x,a.y,a.r,a.damage);
-        break;
-
-      case"evoSun":
-        a.r=lerp(30,a.maxR,1-a.life/a.max);
-        radialDamage(a.x,a.y,a.r,a.damage,a.hit);
-        break;
-
-      case"evoPhantomRain":
-        if(a.life<.1)hitCircle(a.x,a.y,35,a.damage);
-        break;
-
-      case"evoChain":
-        updateChain(a);
-        break;
-
-      case"evoBladeCannon":
-        lineDamage(a.x,a.y,a.a,a.length,65,a.damage);
-        break;
-
-      case"evoBlackSun":
-        a.r=Math.min(420,a.r+150*dt);
-        gravityDamage(a.x,a.y,a.r,a.damage,dt);
-        break;
-
-      case"evoInfinity":
-        a.r=lerp(100,a.maxR,1-a.life/a.max);
-        ringDamage(a.x,a.y,a.r,a.damage,game.time*6);
-        break;
-
-      case"evoFinalRay":
-        lineDamage(a.x,a.y,a.a,a.length,70,a.damage);
-        break;
+ for(let i=game.attacks.length-1;i>=0;i--){
+  const a=game.attacks[i];
+  a.life-=dt;
+
+  if(a.kind==="core"){
+   a.x+=a.vx*dt;
+   a.y+=a.vy*dt;
+  }
+
+  if(a.kind==="wave"){
+   const p=1-a.life/a.max;
+   a.r=25+(a.maxR-25)*p;
+   if(!a.hit)a.hit=new Set();
+   for(const e of game.enemies){
+    if(e.dead||a.hit.has(e))continue;
+    if(Math.hypot(e.x-a.x,e.y-a.y)<a.r+e.r){
+     a.hit.add(e);damageEnemy(e,a.dmg);
     }
-
-    if(a.life<=0)attacks.splice(i,1);
+   }
   }
-}
 
-function nearestEnemyTo(a){
-  let best=null,bd=Infinity;
-  for(const e of enemies){
-    if(e.dead)continue;
-    const d=(e.x-a.x)**2+(e.y-a.y)**2;
-    if(d<bd){bd=d;best=e}
-  }
-  return best;
-}
-
-function hitCircle(x,y,r,dmg,hitSet){
-  let did=false;
-  for(const e of enemies){
-    if(e.dead)continue;
-    if(hitSet&&hitSet.has(e.id))continue;
-    if(Math.hypot(e.x-x,e.y-y)<r+e.r){
-      if(hitSet)hitSet.add(e.id);
-      dealDamage(e,dmg);
-      did=true;
+  if(a.kind==="halo"){
+   if(!a.hit)a.hit=new Set();
+   const radius=a.r*(1-a.life/a.max);
+   for(const e of game.enemies){
+    if(e.dead||a.hit.has(e))continue;
+    if(Math.hypot(e.x-a.x,e.y-a.y)<radius+e.r){
+     a.hit.add(e);damageEnemy(e,a.dmg);
     }
+   }
   }
-  return did;
-}
 
-function radialDamage(x,y,r,dmg,hitSet){
-  for(const e of enemies){
+  if(a.kind==="gravity"){
+   for(const e of game.enemies){
     if(e.dead)continue;
-    if(hitSet&&hitSet.has(e.id))continue;
-    const d=Math.hypot(e.x-x,e.y-y);
-    if(d<r+e.r&&d>Math.max(0,r-55)){
-      if(hitSet)hitSet.add(e.id);
-      dealDamage(e,dmg);
-    }
-  }
-}
-
-function gravityDamage(x,y,r,dmg,dt){
-  for(const e of enemies){
-    if(e.dead)continue;
-    const dx=x-e.x,dy=y-e.y,d=Math.hypot(dx,dy);
-    if(d<r&&d>1){
-      const force=(1-d/r)*240;
-      e.x+=dx/d*force*dt;
-      e.y+=dy/d*force*dt;
-      if(d<Math.min(45,r*.35))dealDamage(e,dmg*dt*3);
-    }
-  }
-}
-
-function ringDamage(x,y,r,dmg,a){
-  for(const e of enemies){
-    if(e.dead)continue;
-    const d=Math.hypot(e.x-x,e.y-y);
-    if(Math.abs(d-r)<38){
-      dealDamage(e,dmg*.12);
-    }
-  }
-}
-
-function damageArc(a,r,angle,width){
-  for(const e of enemies){
-    if(e.dead)continue;
-    const dx=e.x-player.x,dy=e.y-player.y;
+    const dx=a.x-e.x,dy=a.y-e.y;
     const d=Math.hypot(dx,dy);
-    if(Math.abs(d-r)<45){
-      let da=Math.atan2(dy,dx)-angle;
-      da=Math.atan2(Math.sin(da),Math.cos(da));
-      if(Math.abs(da)<width+.2){
-        if(!a.hit.has(e.id)){
-          a.hit.add(e.id);
-          dealDamage(e,a.damage);
-        }
-      }
+    if(d<a.r*2){
+     e.x+=dx/d*180*dt;
+     e.y+=dy/d*180*dt;
     }
+    if(d<35)damageEnemy(e,a.dmg*dt*8);
+   }
   }
-}
 
-function lineDamage(x,y,a,length,width,dmg,hitSet){
-  const ex=x+Math.cos(a)*length;
-  const ey=y+Math.sin(a)*length;
-  for(const e of enemies){
+  if(a.kind==="blackhole"){
+   for(const e of game.enemies){
     if(e.dead)continue;
-    if(hitSet&&hitSet.has(e.id))continue;
-    const px=e.x-x,py=e.y-y;
-    const t=clamp((px*Math.cos(a)+py*Math.sin(a))/length,0,1);
-    const cx=x+Math.cos(a)*length*t;
-    const cy=y+Math.sin(a)*length*t;
-    if(Math.hypot(e.x-cx,e.y-cy)<width+e.r){
-      if(hitSet)hitSet.add(e.id);
-      dealDamage(e,dmg);
+    const dx=a.x-e.x,dy=a.y-e.y;
+    const d=Math.hypot(dx,dy);
+    if(d<a.r*2.5){
+     e.x+=dx/Math.max(1,d)*250*dt;
+     e.y+=dy/Math.max(1,d)*250*dt;
+     if(d<a.r*.6)damageEnemy(e,a.dmg*dt*7);
     }
+   }
   }
-}
 
-function explodeAttack(x,y,r,dmg,hitSet){
-  shock(x,y,r,dmg*.4,"#ff9d5c");
-  hitCircle(x,y,r,dmg,hitSet);
-  burst(x,y,16,"#ff9d5c",260);
-}
-
-function orbitDamage(a,dt){
-  a.angle=(a.angle||0)+dt*3;
-  for(let i=0;i<a.count;i++){
-    const aa=a.angle+i*TAU/a.count;
-    const x=player.x+Math.cos(aa)*130;
-    const y=player.y+Math.sin(aa)*130;
-    hitCircle(x,y,18,a.damage);
+  if(a.kind==="laser"){
+   const cos=Math.cos(a.a),sin=Math.sin(a.a);
+   for(const e of game.enemies){
+    if(e.dead)continue;
+    const dx=e.x-a.x,dy=e.y-a.y;
+    const along=dx*cos+dy*sin;
+    if(along<0||along>a.len)continue;
+    const side=Math.abs(-dx*sin+dy*cos);
+    if(side<a.width+e.r)damageEnemy(e,a.dmg*dt*8);
+   }
   }
-}
 
-function updateChain(a){
-  if(a.life<.5){
-    const ts=a.targets;
-    for(let i=0;i<ts.length;i++){
-      if(ts[i]&&!ts[i].dead){
-        dealDamage(ts[i],a.damage);
-        if(i>0&&ts[i-1]&&!ts[i-1].dead){
-          lightningLine(ts[i-1],ts[i],"#e6dcff");
-        }
-      }
+  if(a.kind==="spear"){
+   const cos=Math.cos(a.a),sin=Math.sin(a.a);
+   for(const e of game.enemies){
+    if(e.dead)continue;
+    const dx=e.x-a.x,dy=e.y-a.y;
+    const along=dx*cos+dy*sin;
+    const side=Math.abs(-dx*sin+dy*cos);
+    if(along>-20&&along<a.len&&side<a.width+e.r){
+     damageEnemy(e,a.dmg);
     }
+   }
   }
+
+  if(a.kind==="meteor" && a.life<.18){
+   for(const e of game.enemies){
+    if(!e.dead&&Math.hypot(e.x-a.x,e.y-a.y)<a.r+e.r){
+     damageEnemy(e,a.dmg);
+    }
+   }
+  }
+
+  if(a.kind==="explosion" && a.life<.2){
+   for(const e of game.enemies){
+    if(!e.dead&&Math.hypot(e.x-a.x,e.y-a.y)<a.r+e.r){
+     damageEnemy(e,a.dmg);
+    }
+   }
+  }
+
+  if(a.kind==="bomb" && a.life<.2){
+   for(const e of game.enemies){
+    if(!e.dead&&Math.hypot(e.x-a.x,e.y-a.y)<a.r+e.r){
+     damageEnemy(e,a.dmg);
+    }
+   }
+  }
+
+  if(a.kind==="axe"){
+   const p=1-a.life/a.max;
+   const rr=50+Math.sin(p*Math.PI)*250;
+   const x=player.x+Math.cos(a.a)*rr;
+   const y=player.y+Math.sin(a.a)*rr;
+   for(const e of game.enemies){
+    if(!e.dead&&Math.hypot(e.x-x,e.y-y)<a.r+e.r){
+     damageEnemy(e,a.dmg);
+    }
+   }
+   a.x=x;a.y=y;
+  }
+
+  if(a.kind==="core"){
+   for(const e of game.enemies){
+    if(!e.dead&&Math.hypot(e.x-a.x,e.y-a.y)<a.r+e.r){
+     damageEnemy(e,a.dmg);
+     a.life=0;
+     break;
+    }
+   }
+  }
+
+  if(a.kind==="blade"){
+   for(const e of game.enemies){
+    if(e.dead)continue;
+    if(Math.hypot(e.x-a.x,e.y-a.y)<a.r+e.r){
+     damageEnemy(e,a.dmg);
+    }
+   }
+  }
+
+  if(a.kind==="shadow"){
+   if(a.life<.16){
+    for(const e of game.enemies){
+     if(!e.dead&&Math.hypot(e.x-a.x,e.y-a.y)<a.r+e.r){
+      damageEnemy(e,a.dmg);
+     }
+    }
+   }
+  }
+
+  if(a.life<=0)game.attacks.splice(i,1);
+ }
 }
 
 /* =========================================================
-   ENEMY UPDATE
+   WEAPON COOLDOWNS
 ========================================================= */
-function updateEnemies(dt){
-  for(const e of enemies){
-    if(e.dead)continue;
 
-    e.hitFlash=Math.max(0,e.hitFlash-dt);
-
-    const dx=player.x-e.x,dy=player.y-e.y;
-    const d=Math.hypot(dx,dy)||1;
-
-    if(e.boss){
-      e.x+=dx/d*e.speed*dt;
-      e.y+=dy/d*e.speed*dt;
-      e.attackTimer-=dt;
-
-      if(e.attackTimer<=0){
-        e.attackTimer=2.5;
-        for(let i=0;i<8;i++){
-          const a=i*TAU/8+game.time;
-          particles.push({
-            x:e.x,y:e.y,
-            vx:Math.cos(a)*260,vy:Math.sin(a)*260,
-            life:.8,max:.8,r:6,color:"#ff4675"
-          });
-        }
-        game.shake=8;
-      }
-    }else{
-      e.x+=dx/d*e.speed*dt;
-      e.y+=dy/d*e.speed*dt;
-    }
-
-    if(d<player.r+e.r){
-      if(player.invuln<=0){
-        const armor=passives.find(p=>p.id==="armor");
-        const reduction=armor?Math.min(.6,armor.level*.045):0;
-        const damage=e.damage*(1-reduction);
-        player.hp-=damage;
-        player.invuln=.45;
-        document.getElementById("damageFlash").style.opacity=".25";
-        game.shake=7;
-      }
-    }
+function updateWeapons(dt){
+ for(const w of player.weapons){
+  w.cooldown-=dt;
+  if(w.cooldown<=0){
+   attackWeapon(w);
+   const base=.85*Math.pow(.94,w.level-1);
+   w.cooldown=Math.max(.08,base/player.attackSpeed);
   }
-
-  enemies=enemies.filter(e=>!e.dead&&Math.abs(e.x-player.x)<2500&&Math.abs(e.y-player.y)<1800);
+ }
 }
 
 /* =========================================================
    PLAYER
 ========================================================= */
+
 function updatePlayer(dt){
-  let dx=0,dy=0;
-  if(keys.ArrowLeft)dx--;
-  if(keys.ArrowRight)dx++;
-  if(keys.ArrowUp)dy--;
-  if(keys.ArrowDown)dy++;
+ let dx=0,dy=0;
+ if(keys.ArrowLeft)dx--;
+ if(keys.ArrowRight)dx++;
+ if(keys.ArrowUp)dy--;
+ if(keys.ArrowDown)dy++;
 
-  if(dx||dy){
-    const len=Math.hypot(dx,dy);
-    dx/=len;dy/=len;
-    player.x+=dx*player.moveSpeed*dt;
-    player.y+=dy*player.moveSpeed*dt;
-  }
+ if(dx||dy){
+  const l=Math.hypot(dx,dy);
+  player.x+=dx/l*player.moveSpeed*dt;
+  player.y+=dy/l*player.moveSpeed*dt;
+ }
 
-  player.invuln=Math.max(0,player.invuln-dt);
+ player.x=clamp(player.x,20,W-20);
+ player.y=clamp(player.y,70,H-20);
+
+ if(player.regen>0){
   player.hp=Math.min(player.maxHp,player.hp+player.regen*dt);
+ }
+
+ if(player.invincible>0)player.invincible-=dt;
 }
 
 /* =========================================================
-   PARTICLES
+   ENEMY UPDATE
 ========================================================= */
-function burst(x,y,count,color,power){
-  const max=Math.min(count,35);
-  for(let i=0;i<max;i++){
-    const a=rand(0,TAU),s=rand(power*.35,power);
-    particles.push({
-      x,y,vx:Math.cos(a)*s,vy:Math.sin(a)*s,
-      life:rand(.25,.8),max:.8,r:rand(1,4),color
-    });
-  }
-}
 
-function shock(x,y,r,dmg,color){
-  rings.push({x,y,r:5,max:r,life:.45,maxLife:.45,color});
-  if(dmg)hitCircle(x,y,r,dmg);
-}
+function updateEnemies(dt){
+ for(const e of game.enemies){
+  if(e.dead)continue;
 
-function lightningLine(a,b,color){
-  trails.push({
-    type:"lightning",
-    x1:a.x,y1:a.y,x2:b.x,y2:b.y,
-    life:.25,max:.25,color
-  });
-}
+  const dx=player.x-e.x,dy=player.y-e.y;
+  const d=Math.hypot(dx,dy)||1;
 
-function updateParticles(dt){
-  for(let i=particles.length-1;i>=0;i--){
-    const p=particles[i];
-    p.x+=p.vx*dt;p.y+=p.vy*dt;
-    p.vx*=Math.pow(.08,dt);p.vy*=Math.pow(.08,dt);
-    p.life-=dt;
-    if(p.life<=0)particles.splice(i,1);
+  e.x+=dx/d*e.speed*dt;
+  e.y+=dy/d*e.speed*dt;
+
+  if(d<e.r+14&&player.invincible<=0){
+   player.hp-=Math.max(1,e.damage-player.defense);
+   player.invincible=.35;
+   game.screenShake=8;
   }
 
-  for(let i=rings.length-1;i>=0;i--){
-    const r=rings[i];
-    r.life-=dt;
-    r.r=lerp(r.max,5,r.life/r.maxLife);
-    if(r.life<=0)rings.splice(i,1);
-  }
+  if(e.hit>0)e.hit-=dt;
+ }
 
-  for(let i=trails.length-1;i>=0;i--){
-    trails[i].life-=dt;
-    if(trails[i].life<=0)trails.splice(i,1);
-  }
-
-  for(let i=texts.length-1;i>=0;i--){
-    texts[i].life-=dt;
-    texts[i].y-=25*dt;
-    if(texts[i].life<=0)texts.splice(i,1);
-  }
-}
-
-function floatingText(x,y,text,color="#fff",size=15){
-  texts.push({x,y,text,color,size,life:1,max:1});
+ game.enemies=game.enemies.filter(e=>!e.dead);
 }
 
 /* =========================================================
-   SPAWN CONTROL
+   GEMS
 ========================================================= */
-let spawnTimer=0;
 
-function targetEnemyCount(){
-  const t=game.time;
-  if(t<120)return 100;
-  if(t<240)return 200;
-  if(t<360)return 350;
-  if(t<480)return 500;
-  if(t<600)return 700;
-  if(t<720)return 900;
-  if(t<840)return 1200;
-  return 2200;
+function updateGems(dt){
+ for(let i=game.gems.length-1;i>=0;i--){
+  const g=game.gems[i];
+  const d=Math.hypot(player.x-g.x,player.y-g.y);
+
+  if(d<player.magnet){
+   const dx=player.x-g.x,dy=player.y-g.y;
+   const speed=500+Math.max(0,player.magnet-d)*5;
+   g.x+=dx/d*speed*dt;
+   g.y+=dy/d*speed*dt;
+  }else{
+   g.x+=g.vx*dt;
+   g.y+=g.vy*dt;
+   g.vx*=.95;g.vy*=.95;
+  }
+
+  if(d<18){
+   gainExp(g.value);
+   game.coins+=Math.ceil(g.value*player.coinGain);
+   burst(g.x,g.y,"#5ceaff",2,30);
+   game.gems.splice(i,1);
+  }
+ }
 }
+
+/* =========================================================
+   SPAWNING
+========================================================= */
+
+let spawnAccumulator=0;
 
 function updateSpawning(dt){
-  const target=targetEnemyCount();
+ spawnAccumulator+=dt;
 
-  const spawnRate=
-    game.time<120?18:
-    game.time<240?28:
-    game.time<360?42:
-    game.time<480?55:
-    game.time<600?70:
-    game.time<720?90:
-    game.time<840?120:180;
+ let targetCount;
+ if(game.time<120)targetCount=100;
+ else if(game.time<240)targetCount=200;
+ else if(game.time<360)targetCount=350;
+ else if(game.time<480)targetCount=500;
+ else if(game.time<600)targetCount=700;
+ else if(game.time<720)targetCount=900;
+ else if(game.time<840)targetCount=1200;
+ else targetCount=2200;
 
-  spawnTimer-=dt;
+ /*
+  一度に全て生成せず、画面外から徐々に補充。
+ */
+ const desired=Math.min(targetCount,2800);
 
-  if(spawnTimer<=0){
-    spawnTimer=1/Math.min(spawnRate,100);
-    if(enemies.filter(e=>!e.dead&&!e.boss).length<target){
-      const amount=Math.min(
-        Math.max(1,Math.floor(spawnRate*.35)),
-        target-enemies.length
-      );
-      for(let i=0;i<amount;i++)spawnEnemy();
-    }
-  }
+ if(game.enemies.length<desired && spawnAccumulator>.025){
+  const amount=Math.min(
+   18,
+   Math.ceil((desired-game.enemies.length)/100)
+  );
 
-  /* Bosses */
-  if(Math.abs(game.time-300)<dt/2&&!game.boss)spawnBoss();
-  if(Math.abs(game.time-600)<dt/2&&!game.boss)spawnBoss();
-  if(Math.abs(game.time-840)<dt/2&&!game.boss)spawnBoss();
+  for(let i=0;i<amount;i++)spawnEnemy(false);
+  spawnAccumulator=0;
+ }
 
-  /* Event announcements */
-  const events=[
-    [120,"MASS ASSAULT","敵の群れが増加"],
-    [210,"ELITE WAVE","強敵出現"],
-    [360,"EXP FEVER","EXPが大量に出現"],
-    [450,"MASS ASSAULT","敵数さらに増加"],
-    [540,"ELITE WAVE","強敵出現"],
-    [660,"COIN FEVER","コイン獲得量UP"],
-    [750,"HUGE ASSAULT","画面を埋め尽くせ"],
-    [840,"FINAL WAVE","最終決戦"]
-  ];
-
-  for(const ev of events){
-    if(Math.abs(game.time-ev[0])<dt/2){
-      announce(ev[1],ev[2]);
-    }
-  }
+ if(game.time>=300&&game.time>=game.nextBoss){
+  spawnEnemy(true);
+  game.nextBoss+=300;
+  flashMessage("BOSS APPEARS!","#ff6580");
+ }
 }
 
 /* =========================================================
-   CAMERA
+   DRAW BACKGROUND
 ========================================================= */
-const camera={x:0,y:0};
 
-function updateCamera(dt){
-  camera.x=lerp(camera.x,player.x,.12);
-  camera.y=lerp(camera.y,player.y,.12);
+function drawBackground(){
+ ctx.fillStyle="#070b16";
+ ctx.fillRect(0,0,W,H);
+
+ const grid=60;
+ ctx.strokeStyle="rgba(100,130,190,.055)";
+ ctx.lineWidth=1;
+
+ for(let x=0;x<W;x+=grid){
+  ctx.beginPath();ctx.moveTo(x,60);ctx.lineTo(x,H);ctx.stroke();
+ }
+ for(let y=60;y<H;y+=grid){
+  ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
+ }
+
+ const g=ctx.createRadialGradient(player.x,player.y,20,player.x,player.y,600);
+ g.addColorStop(0,"rgba(40,100,160,.11)");
+ g.addColorStop(1,"rgba(0,0,0,0)");
+ ctx.fillStyle=g;
+ ctx.fillRect(0,0,W,H);
 }
 
 /* =========================================================
-   DRAW WORLD
+   DRAW PLAYER
 ========================================================= */
-function drawWorld(){
-  ctx.fillStyle="#070b18";
-  ctx.fillRect(0,0,W,H);
 
-  const grid=80;
-  const ox=(((-camera.x)%grid)+grid)%grid;
-  const oy=(((-camera.y)%grid)+grid)%grid;
+function drawPlayer(){
+ ctx.save();
+ ctx.translate(player.x,player.y);
 
-  ctx.strokeStyle="rgba(50,78,120,.16)";
-  ctx.lineWidth=1;
+ ctx.shadowBlur=25;
+ ctx.shadowColor="#65eaff";
 
-  for(let x=ox;x<W;x+=grid){
-    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
+ ctx.beginPath();
+ ctx.arc(0,0,15,0,Math.PI*2);
+ ctx.fillStyle="#baf7ff";
+ ctx.fill();
+
+ ctx.beginPath();
+ ctx.arc(0,0,8,0,Math.PI*2);
+ ctx.fillStyle="#426eff";
+ ctx.fill();
+
+ ctx.shadowBlur=0;
+
+ ctx.strokeStyle="rgba(100,230,255,.4)";
+ ctx.lineWidth=2;
+ ctx.beginPath();
+ ctx.arc(0,0,23+Math.sin(game.time*5)*2,0,Math.PI*2);
+ ctx.stroke();
+
+ ctx.restore();
+}
+
+/* =========================================================
+   DRAW ENEMIES
+========================================================= */
+
+function drawEnemies(){
+ for(const e of game.enemies){
+  const alpha=e.hit>0?1:.9;
+
+  ctx.save();
+  ctx.globalAlpha=alpha;
+  ctx.translate(e.x,e.y);
+
+  ctx.shadowBlur=e.boss?25:8;
+  ctx.shadowColor=e.boss?"#ff4f78":e.elite?"#ffbd55":"#8c65ff";
+
+  ctx.fillStyle=e.boss?"#ff4268":e.elite?"#ffad4d":"#6c5ac8";
+
+  if(e.boss){
+   ctx.beginPath();
+   ctx.arc(0,0,e.r,0,Math.PI*2);
+   ctx.fill();
+
+   ctx.strokeStyle="#ffe66d";
+   ctx.lineWidth=3;
+   ctx.beginPath();
+   ctx.arc(0,0,e.r+8,0,Math.PI*2);
+   ctx.stroke();
+  }else{
+   ctx.beginPath();
+   ctx.moveTo(0,-e.r);
+   ctx.lineTo(e.r,e.r);
+   ctx.lineTo(-e.r,e.r);
+   ctx.closePath();
+   ctx.fill();
   }
-  for(let y=oy;y<H;y+=grid){
-    ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();
-  }
 
-  /* Stage atmosphere */
-  const grd=ctx.createRadialGradient(W/2,H/2,30,W/2,H/2,Math.max(W,H)*.7);
-  grd.addColorStop(0,"rgba(20,40,75,.12)");
-  grd.addColorStop(1,"rgba(0,0,0,.38)");
-  ctx.fillStyle=grd;
-  ctx.fillRect(0,0,W,H);
+  ctx.restore();
+
+  if(e.boss){
+   ctx.fillStyle="rgba(0,0,0,.6)";
+   ctx.fillRect(e.x-50,e.y-e.r-16,100,6);
+   ctx.fillStyle="#ff466a";
+   ctx.fillRect(e.x-50,e.y-e.r-16,100*clamp(e.hp/e.maxHp,0,1),6);
+  }
+ }
 }
 
 /* =========================================================
    DRAW ATTACKS
 ========================================================= */
+
 function drawAttacks(){
-  for(const a of attacks){
-    const p=worldToScreen(a.x||player.x,a.y||player.y);
-    const alpha=clamp(a.life/a.max,0,1);
+ for(const a of game.attacks){
+  const p=1-a.life/a.max;
 
-    ctx.save();
+  ctx.save();
 
-    switch(a.kind){
-
-      case"blade":{
-        const x=W/2,y=H/2;
-        ctx.translate(x,y);
-        ctx.rotate(a.a);
-        const g=ctx.createLinearGradient(a.radius,0,a.radius+a.width,0);
-        g.addColorStop(0,"rgba(255,255,255,.1)");
-        g.addColorStop(.45,"rgba(130,220,255,.9)");
-        g.addColorStop(1,"rgba(255,255,255,0)");
-        ctx.fillStyle=g;
-        ctx.shadowBlur=25;ctx.shadowColor="#76eaff";
-        ctx.beginPath();
-        ctx.moveTo(a.radius-25,-8);
-        ctx.lineTo(a.radius+a.width,0);
-        ctx.lineTo(a.radius-25,8);
-        ctx.closePath();ctx.fill();
-        ctx.strokeStyle="#fff";ctx.lineWidth=3;
-        ctx.beginPath();ctx.moveTo(a.radius-25,-3);ctx.lineTo(a.radius+a.width,0);ctx.stroke();
-        break;
-      }
-
-      case"fireball":{
-        const g=ctx.createRadialGradient(p.x,p.y,1,p.x,p.y,a.r*2.4);
-        g.addColorStop(0,"#fff");
-        g.addColorStop(.2,"#ffe85c");
-        g.addColorStop(.55,"#ff6a32");
-        g.addColorStop(1,"transparent");
-        ctx.fillStyle=g;
-        ctx.beginPath();ctx.arc(p.x,p.y,a.r*2.4,0,TAU);ctx.fill();
-        ctx.fillStyle="#fff1a0";
-        ctx.beginPath();ctx.arc(p.x,p.y,a.r,0,TAU);ctx.fill();
-        break;
-      }
-
-      case"thunder":{
-        const x=p.x,y=p.y;
-        ctx.strokeStyle="#eeeaff";
-        ctx.shadowBlur=25;ctx.shadowColor="#bca7ff";
-        ctx.lineWidth=9;
-        ctx.beginPath();
-        ctx.moveTo(x,y-260);
-        ctx.lineTo(x+rand(-20,20),y-150);
-        ctx.lineTo(x-15,y-90);
-        ctx.lineTo(x+10,y);
-        ctx.stroke();
-        ctx.lineWidth=2;ctx.strokeStyle="#fff";
-        ctx.stroke();
-        ctx.globalAlpha=.3;
-        ctx.fillStyle="#d6c7ff";
-        ctx.fillRect(x-25,y-260,50,260);
-        break;
-      }
-
-      case"meteor":{
-        const x=p.x,y=p.y;
-        ctx.strokeStyle="#ffb25e";ctx.lineWidth=9;
-        ctx.shadowBlur=20;ctx.shadowColor="#ff6d38";
-        ctx.beginPath();
-        ctx.moveTo(x-100,y-100);
-        ctx.lineTo(x-20,y-20);
-        ctx.stroke();
-        ctx.fillStyle="#ff7b3d";
-        ctx.beginPath();ctx.arc(x,y,22,0,TAU);ctx.fill();
-        ctx.fillStyle="#fff0a5";
-        ctx.beginPath();ctx.arc(x,y,10,0,TAU);ctx.fill();
-        if(a.life<.22){
-          ctx.globalAlpha=alpha*4;
-          ctx.strokeStyle="#fff";
-          ctx.lineWidth=5;
-          ctx.beginPath();ctx.arc(x,y,a.r*(1-alpha+.2),0,TAU);ctx.stroke();
-        }
-        break;
-      }
-
-      case"gravity":{
-        const x=p.x,y=p.y;
-        const pulse=1+Math.sin(game.time*10)*.08;
-        ctx.shadowBlur=30;ctx.shadowColor="#a66cff";
-        ctx.fillStyle="#170a2e";
-        ctx.beginPath();ctx.arc(x,y,a.r*pulse,0,TAU);ctx.fill();
-        ctx.strokeStyle="#c28aff";ctx.lineWidth=4;
-        ctx.beginPath();ctx.arc(x,y,a.r*pulse,0,TAU);ctx.stroke();
-        for(let k=0;k<8;k++){
-          const aa=game.time*2+k*TAU/8;
-          ctx.strokeStyle="#9f70ff88";
-          ctx.beginPath();
-          ctx.moveTo(x+Math.cos(aa)*(a.r+35),y+Math.sin(aa)*(a.r+35));
-          ctx.lineTo(x+Math.cos(aa)*a.r,y+Math.sin(aa)*a.r);
-          ctx.stroke();
-        }
-        break;
-      }
-
-      case"voidCannon":{
-        const x=p.x,y=p.y;
-        ctx.translate(x,y);ctx.rotate(a.a);
-        const charge=1-Math.min(1,a.life/.85);
-        ctx.fillStyle="#d8c7ff";
-        ctx.shadowBlur=35;ctx.shadowColor="#9a5cff";
-        ctx.fillRect(0,-25,Math.min(a.length,charge*a.length),50);
-        ctx.fillStyle="#fff";
-        ctx.fillRect(0,-8,Math.min(a.length,charge*a.length),16);
-        ctx.strokeStyle="#9f62ff";
-        ctx.lineWidth=4;
-        ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(a.length,0);ctx.stroke();
-        break;
-      }
-
-      case"iceSpear":{
-        ctx.translate(W/2,H/2);ctx.rotate(a.a);
-        const len=a.length;
-        ctx.shadowBlur=20;ctx.shadowColor="#52dcff";
-        ctx.fillStyle="#8ff0ff";
-        ctx.beginPath();
-        ctx.moveTo(-30,-16);
-        ctx.lineTo(len,0);
-        ctx.lineTo(-30,16);
-        ctx.closePath();ctx.fill();
-        ctx.fillStyle="#e9ffff";
-        ctx.beginPath();
-        ctx.moveTo(-5,-6);ctx.lineTo(len*.9,0);ctx.lineTo(-5,6);ctx.closePath();ctx.fill();
-        break;
-      }
-
-      case"shadow":{
-        ctx.strokeStyle="#a36cff";
-        ctx.shadowBlur=18;ctx.shadowColor="#8c4dff";
-        ctx.lineWidth=8;
-        ctx.beginPath();
-        ctx.moveTo(p.x-20,p.y+25);
-        ctx.lineTo(p.x,p.y-45);
-        ctx.lineTo(p.x+20,p.y+25);
-        ctx.stroke();
-        break;
-      }
-
-      case"lightRing":{
-        ctx.translate(W/2,H/2);ctx.rotate(a.a);
-        ctx.strokeStyle="#fff5a5";ctx.shadowBlur=25;ctx.shadowColor="#fff08a";
-        ctx.lineWidth=9;
-        ctx.beginPath();ctx.arc(0,0,a.radius,0,TAU);ctx.stroke();
-        ctx.lineWidth=2;ctx.strokeStyle="#fff";
-        ctx.beginPath();ctx.arc(0,0,a.radius+12,0,TAU);ctx.stroke();
-        break;
-      }
-
-      case"endWave":{
-        ctx.strokeStyle="#ff63ce";
-        ctx.shadowBlur=25;ctx.shadowColor="#ff48c6";
-        ctx.lineWidth=12;
-        ctx.globalAlpha=alpha;
-        ctx.beginPath();ctx.arc(W/2,H/2,a.r,0,TAU);ctx.stroke();
-        ctx.lineWidth=3;ctx.strokeStyle="#fff";
-        ctx.beginPath();ctx.arc(W/2,H/2,a.r-10,0,TAU);ctx.stroke();
-        break;
-      }
-
-      case"axe":{
-        ctx.translate(W/2,H/2);ctx.rotate(a.a);
-        ctx.strokeStyle="#ffcd75";ctx.shadowBlur=20;ctx.shadowColor="#ff9e38";
-        ctx.lineWidth=18;
-        ctx.beginPath();ctx.moveTo(-a.length/2,0);ctx.lineTo(a.length/2,0);ctx.stroke();
-        ctx.fillStyle="#fff0a4";
-        ctx.beginPath();ctx.arc(a.length/2,0,32,0,TAU);ctx.fill();
-        break;
-      }
-
-      case"starCore":{
-        const x=W/2+Math.cos(a.a)*110;
-        const y=H/2+Math.sin(a.a)*110;
-        ctx.shadowBlur=25;ctx.shadowColor="#7ceaff";
-        ctx.fillStyle="#b8f5ff";
-        ctx.beginPath();ctx.arc(x,y,a.r,0,TAU);ctx.fill();
-        ctx.strokeStyle="#fff";ctx.lineWidth=3;
-        for(let k=0;k<4;k++){
-          const aa=k*Math.PI/2+game.time*3;
-          ctx.beginPath();
-          ctx.moveTo(x-Math.cos(aa)*a.r*2,y-Math.sin(aa)*a.r*2);
-          ctx.lineTo(x+Math.cos(aa)*a.r*2,y+Math.sin(aa)*a.r*2);
-          ctx.stroke();
-        }
-        break;
-      }
-
-      case"bomb":{
-        ctx.fillStyle="#ff633e";ctx.shadowBlur=30;ctx.shadowColor="#ff4d32";
-        ctx.beginPath();ctx.arc(p.x,p.y,a.r,0,TAU);ctx.fill();
-        ctx.fillStyle="#ffe69a";
-        ctx.beginPath();ctx.arc(p.x-7,p.y-7,a.r*.35,0,TAU);ctx.fill();
-        break;
-      }
-
-      case"voidGate":{
-        ctx.strokeStyle="#9e67ff";ctx.shadowBlur=30;ctx.shadowColor="#7b3fff";
-        ctx.lineWidth=8;
-        ctx.beginPath();ctx.arc(p.x,p.y,a.r,0,TAU);ctx.stroke();
-        ctx.fillStyle="#07000e";
-        ctx.beginPath();ctx.arc(p.x,p.y,a.r*.72,0,TAU);ctx.fill();
-        break;
-      }
-
-      case"phantom":{
-        ctx.translate(W/2,H/2);ctx.rotate(a.a);
-        ctx.strokeStyle="#e6d8ff";ctx.shadowBlur=18;ctx.shadowColor="#c48cff";
-        ctx.lineWidth=8;
-        ctx.beginPath();ctx.moveTo(15,-20);ctx.lineTo(a.len,0);ctx.lineTo(15,20);ctx.stroke();
-        break;
-      }
-
-      case"orbitFire":{
-        for(let k=0;k<a.count;k++){
-          const aa=(a.angle||game.time*3)+k*TAU/a.count;
-          const x=W/2+Math.cos(aa)*130,y=H/2+Math.sin(aa)*130;
-          ctx.fillStyle="#ff7b38";ctx.shadowBlur=20;ctx.shadowColor="#ff5328";
-          ctx.beginPath();ctx.arc(x,y,10,0,TAU);ctx.fill();
-        }
-        break;
-      }
-
-      case"rainLaser":
-      case"evoRain":{
-        ctx.strokeStyle="#fff4a2";ctx.shadowBlur=20;ctx.shadowColor="#ffe34e";
-        ctx.lineWidth=8;
-        ctx.beginPath();ctx.moveTo(p.x,p.y-130);ctx.lineTo(p.x,p.y+80);ctx.stroke();
-        ctx.lineWidth=2;ctx.strokeStyle="#fff";
-        ctx.stroke();
-        break;
-      }
-
-      case"bladeStorm":{
-        ctx.translate(W/2,H/2);ctx.rotate(a.a);
-        ctx.strokeStyle="#b7d8ff";ctx.shadowBlur=15;ctx.shadowColor="#5cbcff";
-        ctx.lineWidth=7;
-        ctx.beginPath();ctx.moveTo(30,0);ctx.lineTo(a.len,0);ctx.stroke();
-        break;
-      }
-
-      case"plasma":
-      case"evoPlasma":{
-        ctx.translate(p.x,p.y);ctx.rotate(a.a||angleTo({x:0,y:0},{x:a.vx||1,y:a.vy||0}));
-        ctx.strokeStyle="#74ffe0";ctx.shadowBlur=25;ctx.shadowColor="#27ffd1";
-        ctx.lineWidth=12;
-        ctx.beginPath();ctx.moveTo(-50,0);ctx.lineTo(50,0);ctx.stroke();
-        ctx.lineWidth=4;ctx.strokeStyle="#fff";ctx.stroke();
-        break;
-      }
-
-      case"moonAxe":{
-        ctx.translate(W/2,H/2);ctx.rotate(a.a);
-        ctx.strokeStyle="#d8bfff";ctx.shadowBlur=25;ctx.shadowColor="#a45cff";
-        ctx.lineWidth=20;
-        ctx.beginPath();ctx.arc(0,0,a.len*.65,-.8,.8);ctx.stroke();
-        break;
-      }
-
-      case"frostNova":
-      case"evoFrost":{
-        ctx.strokeStyle="#72eaff";ctx.shadowBlur=25;ctx.shadowColor="#40cfff";
-        ctx.lineWidth=7;
-        ctx.globalAlpha=alpha;
-        ctx.beginPath();ctx.arc(W/2,H/2,a.r,0,TAU);ctx.stroke();
-        for(let k=0;k<8;k++){
-          const aa=k*TAU/8;
-          ctx.beginPath();
-          ctx.moveTo(W/2+Math.cos(aa)*a.r*.6,H/2+Math.sin(aa)*a.r*.6);
-          ctx.lineTo(W/2+Math.cos(aa)*a.r,H/2+Math.sin(aa)*a.r);
-          ctx.stroke();
-        }
-        break;
-      }
-
-      case"soulSpear":
-      case"evoSoul":{
-        ctx.translate(p.x,p.y);
-        ctx.rotate(Math.atan2(a.vy||1,a.vx||0));
-        ctx.fillStyle="#ff78f2";ctx.shadowBlur=25;ctx.shadowColor="#ff35e9";
-        ctx.beginPath();ctx.moveTo(-20,-18);ctx.lineTo(130,0);ctx.lineTo(-20,18);ctx.closePath();ctx.fill();
-        break;
-      }
-
-      case"storm":
-      case"evoStormCloud":{
-        ctx.strokeStyle="#83dfff";ctx.shadowBlur=30;ctx.shadowColor="#39c9ff";
-        ctx.lineWidth=8;
-        for(let k=0;k<4;k++){
-          const aa=game.time*2+k*TAU/4;
-          ctx.beginPath();
-          ctx.arc(p.x,p.y,a.r*.7,aa,aa+1.3);
-          ctx.stroke();
-        }
-        break;
-      }
-
-      case"smallMeteor":
-      case"evoMeteor":
-      case"evoMeteorRain":{
-        ctx.fillStyle="#ff7d45";ctx.shadowBlur=20;ctx.shadowColor="#ff512d";
-        ctx.beginPath();ctx.arc(p.x,p.y,12,0,TAU);ctx.fill();
-        ctx.strokeStyle="#ffb15e";ctx.lineWidth=6;
-        ctx.beginPath();ctx.moveTo(p.x-45,p.y-45);ctx.lineTo(p.x-10,p.y-10);ctx.stroke();
-        break;
-      }
-
-      case"crossSlash":
-      case"evoCross":{
-        ctx.translate(W/2,H/2);
-        ctx.strokeStyle="#d9eaff";ctx.shadowBlur=25;ctx.shadowColor="#66baff";
-        ctx.lineWidth=16;
-        const len=a.len;
-        for(let k=0;k<2;k++){
-          ctx.rotate(k*Math.PI/2);
-          ctx.beginPath();ctx.moveTo(-len/2,0);ctx.lineTo(len/2,0);ctx.stroke();
-        }
-        break;
-      }
-
-      case"energyOrb":
-      case"evoOrb":{
-        ctx.fillStyle="#72faff";ctx.shadowBlur=30;ctx.shadowColor="#2eeaff";
-        ctx.beginPath();ctx.arc(p.x,p.y,a.r,0,TAU);ctx.fill();
-        ctx.strokeStyle="#fff";ctx.lineWidth=3;ctx.stroke();
-        break;
-      }
-
-      case"sunBurst":
-      case"evoSun":{
-        const g=ctx.createRadialGradient(W/2,H/2,1,W/2,H/2,a.r);
-        g.addColorStop(0,"#fff");
-        g.addColorStop(.2,"#fff6a0");
-        g.addColorStop(.5,"#ffae38");
-        g.addColorStop(1,"rgba(255,70,20,0)");
-        ctx.fillStyle=g;
-        ctx.beginPath();ctx.arc(W/2,H/2,a.r,0,TAU);ctx.fill();
-        break;
-      }
-
-      case"phantomRain":
-      case"evoPhantomRain":{
-        ctx.translate(p.x,p.y);
-        ctx.strokeStyle="#ffb2f3";ctx.shadowBlur=18;ctx.shadowColor="#ff4ddf";
-        ctx.lineWidth=7;
-        ctx.beginPath();ctx.moveTo(0,-70);ctx.lineTo(0,25);ctx.stroke();
-        ctx.strokeStyle="#fff";ctx.lineWidth=2;ctx.stroke();
-        break;
-      }
-
-      case"chainLightning":
-      case"evoChain":{
-        if(a.targets){
-          for(let k=1;k<a.targets.length;k++){
-            const aa=a.targets[k-1],bb=a.targets[k];
-            if(aa&&bb&&!aa.dead&&!bb.dead){
-              const A=worldToScreen(aa.x,aa.y),B=worldToScreen(bb.x,bb.y);
-              ctx.strokeStyle="#e4d9ff";ctx.shadowBlur=20;ctx.shadowColor="#9f70ff";
-              ctx.lineWidth=4;
-              ctx.beginPath();
-              ctx.moveTo(A.x,A.y);
-              for(let z=1;z<6;z++){
-                const t=z/6;
-                ctx.lineTo(
-                  lerp(A.x,B.x,t)+rand(-12,12),
-                  lerp(A.y,B.y,t)+rand(-12,12)
-                );
-              }
-              ctx.lineTo(B.x,B.y);ctx.stroke();
-            }
-          }
-        }
-        break;
-      }
-
-      case"bladeCannon":
-      case"evoBladeCannon":{
-        ctx.translate(p.x,p.y);ctx.rotate(a.a);
-        ctx.fillStyle="#d8eaff";ctx.shadowBlur=35;ctx.shadowColor="#5ebcff";
-        ctx.beginPath();
-        ctx.moveTo(-40,-25);ctx.lineTo(a.length,0);ctx.lineTo(-40,25);ctx.closePath();ctx.fill();
-        ctx.fillStyle="#fff";ctx.fillRect(-20,-5,a.length,10);
-        break;
-      }
-
-      case"blackSun":
-      case"evoBlackSun":{
-        ctx.fillStyle="#09000e";ctx.shadowBlur=40;ctx.shadowColor="#a34cff";
-        ctx.beginPath();ctx.arc(p.x,p.y,a.r,0,TAU);ctx.fill();
-        ctx.strokeStyle="#c27aff";ctx.lineWidth=6;
-        ctx.beginPath();ctx.arc(p.x,p.y,a.r,0,TAU);ctx.stroke();
-        break;
-      }
-
-      case"infinity":
-      case"evoInfinity":{
-        ctx.strokeStyle="#ffffff";ctx.shadowBlur=25;ctx.shadowColor="#8ddcff";
-        ctx.lineWidth=8;
-        ctx.beginPath();
-        ctx.ellipse(W/2,H/2,a.r,a.r*.55,game.time*2,0,TAU);
-        ctx.stroke();
-        ctx.beginPath();
-        ctx.ellipse(W/2,H/2,a.r*.55,a.r,game.time*2,0,TAU);
-        ctx.stroke();
-        break;
-      }
-
-      case"finalRay":
-      case"evoFinalRay":{
-        ctx.translate(p.x,p.y);ctx.rotate(a.a);
-        ctx.shadowBlur=45;ctx.shadowColor="#bdf8ff";
-        ctx.fillStyle="rgba(170,245,255,.8)";
-        ctx.fillRect(0,-35,a.length,70);
-        ctx.fillStyle="#fff";
-        ctx.fillRect(0,-10,a.length,20);
-        break;
-      }
-
-      case"evoRing":{
-        ctx.strokeStyle="#ffffff";ctx.shadowBlur=40;ctx.shadowColor="#8deaff";
-        ctx.lineWidth=14;
-        ctx.beginPath();ctx.arc(W/2,H/2,a.r,0,TAU);ctx.stroke();
-        ctx.strokeStyle="#75eaff";ctx.lineWidth=3;
-        ctx.beginPath();ctx.arc(W/2,H/2,a.r+20,0,TAU);ctx.stroke();
-        break;
-      }
-
-      case"evoFire":{
-        ctx.strokeStyle="#ff7b39";ctx.shadowBlur=40;ctx.shadowColor="#ff4728";
-        ctx.lineWidth=15;
-        ctx.beginPath();ctx.arc(p.x,p.y,a.r,0,TAU);ctx.stroke();
-        break;
-      }
-
-      case"evoAxe":{
-        ctx.translate(W/2,H/2);ctx.rotate(a.a);
-        ctx.strokeStyle="#ffe19a";ctx.shadowBlur=30;ctx.shadowColor="#ff9d35";
-        ctx.lineWidth=30;
-        ctx.beginPath();ctx.moveTo(-a.r,0);ctx.lineTo(a.r,0);ctx.stroke();
-        break;
-      }
-
-      default:break;
-    }
-
-    ctx.restore();
+  if(a.kind==="blade"){
+   ctx.translate(a.x,a.y);
+   ctx.rotate(a.a+p*3);
+   ctx.shadowBlur=20;
+   ctx.shadowColor="#71edff";
+   ctx.strokeStyle="#d8fbff";
+   ctx.lineWidth=5;
+   ctx.beginPath();
+   ctx.moveTo(-8,-25);
+   ctx.lineTo(8,25);
+   ctx.stroke();
+   ctx.strokeStyle="#5beaff";
+   ctx.lineWidth=2;
+   ctx.beginPath();
+   ctx.arc(0,0,28,0,Math.PI);
+   ctx.stroke();
   }
+
+  if(a.kind==="bolt"){
+   ctx.translate(a.x,a.y);
+   ctx.shadowBlur=25;
+   ctx.shadowColor="#fff36b";
+   ctx.strokeStyle="#fffbd1";
+   ctx.lineWidth=4;
+   ctx.beginPath();
+   ctx.moveTo(rand(-8,8),-70);
+   for(let i=0;i<5;i++){
+    ctx.lineTo(rand(-18,18),-70+i*35);
+   }
+   ctx.stroke();
+   ctx.strokeStyle="#fff36b";
+   ctx.lineWidth=12;
+   ctx.globalAlpha=.15;
+   ctx.beginPath();
+   ctx.moveTo(0,-70);ctx.lineTo(0,70);ctx.stroke();
+  }
+
+  if(a.kind==="meteor"){
+   ctx.translate(a.x,a.y);
+   const q=Math.min(1,p*2);
+   ctx.globalAlpha=q;
+   ctx.shadowBlur=30;
+   ctx.shadowColor="#ff8a45";
+   ctx.fillStyle="#ffce67";
+   ctx.beginPath();
+   ctx.arc(0,0,a.r*(1-p*.3),0,Math.PI*2);
+   ctx.fill();
+   ctx.strokeStyle="#ff7045";
+   ctx.lineWidth=5;
+   ctx.beginPath();
+   ctx.moveTo(-10,-a.r*3);ctx.lineTo(0,0);
+   ctx.stroke();
+   ctx.globalAlpha=.3;
+   ctx.beginPath();ctx.arc(0,0,a.r*1.8,0,Math.PI*2);ctx.stroke();
+  }
+
+  if(a.kind==="gravity"){
+   ctx.translate(a.x,a.y);
+   ctx.shadowBlur=30;
+   ctx.shadowColor="#a867ff";
+   ctx.strokeStyle="#d0a0ff";
+   ctx.lineWidth=5;
+   ctx.beginPath();
+   ctx.arc(0,0,a.r*(1+p*.2),0,Math.PI*2);
+   ctx.stroke();
+   ctx.strokeStyle="#fff";
+   ctx.lineWidth=2;
+   ctx.beginPath();
+   ctx.arc(0,0,a.r*.55,0,Math.PI*2);
+   ctx.stroke();
+  }
+
+  if(a.kind==="blackhole"){
+   ctx.translate(a.x,a.y);
+   ctx.shadowBlur=35;
+   ctx.shadowColor="#9f65ff";
+   ctx.fillStyle="#03030a";
+   ctx.beginPath();ctx.arc(0,0,a.r,0,Math.PI*2);ctx.fill();
+   ctx.strokeStyle="#b77aff";
+   ctx.lineWidth=5;
+   ctx.beginPath();
+   ctx.arc(0,0,a.r*1.35,game.time*2,game.time*2+Math.PI*1.5);
+   ctx.stroke();
+  }
+
+  if(a.kind==="laser"){
+   ctx.translate(a.x,a.y);
+   ctx.rotate(a.a);
+   ctx.shadowBlur=30;
+   ctx.shadowColor="#b6f8ff";
+   ctx.strokeStyle="#fff";
+   ctx.lineWidth=a.width;
+   ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(a.len,0);ctx.stroke();
+   ctx.strokeStyle="#62eaff";
+   ctx.lineWidth=a.width*2.5;
+   ctx.globalAlpha=.15;
+   ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(a.len,0);ctx.stroke();
+  }
+
+  if(a.kind==="spear"){
+   ctx.translate(a.x,a.y);
+   ctx.rotate(a.a);
+   ctx.shadowBlur=25;
+   ctx.shadowColor="#9cecff";
+   ctx.strokeStyle="#dffcff";
+   ctx.lineWidth=a.width;
+   ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(a.len,0);ctx.stroke();
+   ctx.strokeStyle="#5ceaff";
+   ctx.lineWidth=3;
+   ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(a.len,0);ctx.stroke();
+  }
+
+  if(a.kind==="explosion"||a.kind==="bomb"){
+   ctx.translate(a.x,a.y);
+   const rr=a.r*(1+Math.sin(p*Math.PI)*.25);
+   ctx.shadowBlur=35;
+   ctx.shadowColor="#ff723f";
+   ctx.strokeStyle="#ffe18c";
+   ctx.lineWidth=6;
+   ctx.beginPath();ctx.arc(0,0,rr,0,Math.PI*2);ctx.stroke();
+   ctx.strokeStyle="#ff693f";
+   ctx.lineWidth=2;
+   for(let i=0;i<10;i++){
+    const ang=i*Math.PI*2/10;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(ang)*rr*.8,Math.sin(ang)*rr*.8);
+    ctx.lineTo(Math.cos(ang)*rr*1.6,Math.sin(ang)*rr*1.6);
+    ctx.stroke();
+   }
+  }
+
+  if(a.kind==="shadow"){
+   ctx.translate(a.x,a.y);
+   ctx.shadowBlur=20;
+   ctx.shadowColor="#a36bff";
+   ctx.strokeStyle="#e3caff";
+   ctx.lineWidth=5;
+   for(let i=0;i<4;i++){
+    ctx.rotate(Math.PI/2);
+    ctx.beginPath();ctx.moveTo(-a.r,0);ctx.lineTo(a.r,0);ctx.stroke();
+   }
+  }
+
+  if(a.kind==="halo"){
+   ctx.translate(a.x,a.y);
+   const rr=a.r*(1-p*.15);
+   ctx.shadowBlur=25;
+   ctx.shadowColor="#fff36b";
+   ctx.strokeStyle="#fff7a6";
+   ctx.lineWidth=6;
+   ctx.beginPath();ctx.arc(0,0,rr,game.time*2,game.time*2+Math.PI*1.7);ctx.stroke();
+   ctx.strokeStyle="#fff";
+   ctx.lineWidth=2;
+   ctx.beginPath();ctx.arc(0,0,rr*.75,-game.time*3,-game.time*3+Math.PI*1.4);ctx.stroke();
+  }
+
+  if(a.kind==="wave"){
+   ctx.translate(a.x,a.y);
+   ctx.globalAlpha=1-p;
+   ctx.shadowBlur=25;
+   ctx.shadowColor="#6cf6ff";
+   ctx.strokeStyle="#b8fbff";
+   ctx.lineWidth=5;
+   ctx.beginPath();ctx.arc(0,0,a.r,0,Math.PI*2);ctx.stroke();
+  }
+
+  if(a.kind==="axe"){
+   ctx.translate(a.x,a.y);
+   ctx.rotate(a.a+p*4);
+   ctx.shadowBlur=25;
+   ctx.shadowColor="#ff9d5c";
+   ctx.fillStyle="#e8edf8";
+   ctx.beginPath();
+   ctx.moveTo(-8,-38);ctx.quadraticCurveTo(30,-20,40,0);
+   ctx.quadraticCurveTo(30,20,-8,38);
+   ctx.lineTo(0,0);ctx.closePath();ctx.fill();
+  }
+
+  if(a.kind==="core"){
+   ctx.translate(a.x,a.y);
+   ctx.shadowBlur=20;
+   ctx.shadowColor="#d17aff";
+   ctx.fillStyle="#e6b7ff";
+   ctx.beginPath();ctx.arc(0,0,a.r,0,Math.PI*2);ctx.fill();
+  }
+
+  if(a.kind==="slash"){
+   ctx.translate(a.x,a.y);
+   ctx.rotate(a.a);
+   ctx.shadowBlur=25;
+   ctx.shadowColor="#c9a4ff";
+   ctx.strokeStyle="#fff";
+   ctx.lineWidth=6;
+   ctx.beginPath();ctx.arc(0,0,a.r,-1.2,1.2);ctx.stroke();
+  }
+
+  if(a.kind==="hit"){
+   ctx.translate(a.x,a.y);
+   ctx.globalAlpha=1-p;
+   ctx.strokeStyle="#fff";
+   ctx.lineWidth=3;
+   ctx.beginPath();ctx.arc(0,0,a.r*(1+p),0,Math.PI*2);ctx.stroke();
+  }
+
+  ctx.restore();
+ }
 }
 
 /* =========================================================
-   DRAW ENEMIES / DROPS / PLAYER
+   DRAW GEMS / PARTICLES / TEXT
 ========================================================= */
-function drawEnemies(){
-  for(const e of enemies){
-    if(e.dead)continue;
-    const p=worldToScreen(e.x,e.y);
 
-    ctx.save();
-
-    if(e.boss){
-      const pulse=1+Math.sin(game.time*5)*.08;
-      ctx.shadowBlur=35;ctx.shadowColor="#ff245d";
-      ctx.fillStyle="#3a1021";
-      ctx.beginPath();ctx.arc(p.x,p.y,e.r*pulse,0,TAU);ctx.fill();
-      ctx.strokeStyle="#ff4c75";ctx.lineWidth=6;ctx.stroke();
-      ctx.fillStyle="#ff6989";
-      for(let k=0;k<6;k++){
-        const a=k*TAU/6+game.time;
-        ctx.beginPath();
-        ctx.moveTo(p.x+Math.cos(a)*e.r*.7,p.y+Math.sin(a)*e.r*.7);
-        ctx.lineTo(p.x+Math.cos(a)*e.r*1.45,p.y+Math.sin(a)*e.r*1.45);
-        ctx.stroke();
-      }
-      ctx.fillStyle="#fff";
-      ctx.beginPath();ctx.arc(p.x-18,p.y-8,6,0,TAU);ctx.arc(p.x+18,p.y-8,6,0,TAU);ctx.fill();
-    }else{
-      ctx.shadowBlur=12;ctx.shadowColor=e.color;
-      ctx.fillStyle=e.hitFlash>0?"#fff":e.color;
-
-      if(e.type===0){
-        ctx.beginPath();ctx.arc(p.x,p.y,e.r,0,TAU);ctx.fill();
-      }else if(e.type===1){
-        ctx.beginPath();
-        ctx.moveTo(p.x,p.y-e.r);
-        ctx.lineTo(p.x+e.r,p.y);
-        ctx.lineTo(p.x,p.y+e.r);
-        ctx.lineTo(p.x-e.r,p.y);
-        ctx.closePath();ctx.fill();
-      }else if(e.type===2){
-        ctx.beginPath();
-        ctx.moveTo(p.x,p.y-e.r);
-        ctx.lineTo(p.x+e.r,p.y+e.r);
-        ctx.lineTo(p.x-e.r,p.y+e.r);
-        ctx.closePath();ctx.fill();
-      }else{
-        ctx.beginPath();ctx.arc(p.x,p.y,e.r,0,TAU);ctx.fill();
-        ctx.strokeStyle="#fff8";ctx.lineWidth=2;ctx.stroke();
-      }
-    }
-
-    if(!e.boss&&e.hp<e.maxHp){
-      const bw=e.r*2.4;
-      ctx.fillStyle="#170b12";
-      ctx.fillRect(p.x-bw/2,p.y-e.r-9,bw,4);
-      ctx.fillStyle="#ff5674";
-      ctx.fillRect(p.x-bw/2,p.y-e.r-9,bw*clamp(e.hp/e.maxHp,0,1),4);
-    }
-
-    ctx.restore();
-  }
-}
-
-function drawDrops(){
-  for(const g of gems){
-    const p=worldToScreen(g.x,g.y);
-    ctx.fillStyle="#6cecff";
-    ctx.shadowBlur=12;ctx.shadowColor="#2deaff";
-    ctx.beginPath();
-    ctx.moveTo(p.x,p.y-g.r);
-    ctx.lineTo(p.x+g.r,p.y);
-    ctx.lineTo(p.x,p.y+g.r);
-    ctx.lineTo(p.x-g.r,p.y);
-    ctx.closePath();ctx.fill();
-  }
-
-  for(const c of coins){
-    const p=worldToScreen(c.x,c.y);
-    ctx.fillStyle="#ffd34d";
-    ctx.shadowBlur=10;ctx.shadowColor="#ffb300";
-    ctx.beginPath();ctx.arc(p.x,p.y,6,0,TAU);ctx.fill();
-    ctx.fillStyle="#8d5b00";
-    ctx.font="8px Arial";ctx.textAlign="center";ctx.fillText("$",p.x,p.y+3);
-  }
-
-  for(const c of chests){
-    const p=worldToScreen(c.x,c.y);
-    const pulse=1+Math.sin(c.pulse)*.1;
-    ctx.save();
-    ctx.translate(p.x,p.y);ctx.scale(pulse,pulse);
-    ctx.shadowBlur=30;ctx.shadowColor="#ffd43d";
-    ctx.fillStyle="#9b5d20";
-    ctx.fillRect(-22,-15,44,30);
-    ctx.fillStyle="#ffd75c";
-    ctx.fillRect(-22,-15,44,7);
-    ctx.fillStyle="#fff1a0";
-    ctx.fillRect(-4,-14,8,29);
-    ctx.strokeStyle="#ffe36c";ctx.lineWidth=2;ctx.strokeRect(-22,-15,44,30);
-    ctx.restore();
-  }
-}
-
-function drawPlayer(){
-  const x=W/2,y=H/2;
+function drawGems(){
+ for(const g of game.gems){
   ctx.save();
-
-  if(player.invuln>0&&Math.floor(player.invuln*20)%2===0)ctx.globalAlpha=.45;
-
-  ctx.shadowBlur=25;ctx.shadowColor="#43ddff";
-  ctx.fillStyle="#162b4a";
-  ctx.beginPath();ctx.arc(x,y,player.r+5,0,TAU);ctx.fill();
-
-  ctx.fillStyle="#64eaff";
-  ctx.beginPath();ctx.arc(x,y,player.r,0,TAU);ctx.fill();
-
-  ctx.fillStyle="#fff";
-  ctx.beginPath();ctx.arc(x-5,y-4,4,0,TAU);ctx.arc(x+5,y-4,4,0,TAU);ctx.fill();
-
-  ctx.fillStyle="#172238";
-  ctx.beginPath();ctx.arc(x-5,y-4,2,0,TAU);ctx.arc(x+5,y-4,2,0,TAU);ctx.fill();
-
+  ctx.translate(g.x,g.y);
+  ctx.rotate(game.time*3);
+  ctx.shadowBlur=12;
+  ctx.shadowColor="#58eaff";
+  ctx.fillStyle="#69ecff";
+  ctx.beginPath();
+  ctx.moveTo(0,-g.r);
+  ctx.lineTo(g.r,0);
+  ctx.lineTo(0,g.r);
+  ctx.lineTo(-g.r,0);
+  ctx.closePath();
+  ctx.fill();
   ctx.restore();
+ }
 }
 
 function drawParticles(){
-  for(const p of particles){
-    const s=worldToScreen(p.x,p.y);
-    ctx.globalAlpha=clamp(p.life/p.max,0,1);
-    ctx.fillStyle=p.color;
-    ctx.shadowBlur=10;ctx.shadowColor=p.color;
-    ctx.beginPath();ctx.arc(s.x,s.y,p.r,0,TAU);ctx.fill();
-  }
-  ctx.globalAlpha=1;
+ for(const p of game.particles){
+  ctx.globalAlpha=clamp(p.life/p.max,0,1);
+  ctx.fillStyle=p.color;
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,p.size,0,Math.PI*2);
+  ctx.fill();
+ }
+ ctx.globalAlpha=1;
+}
 
-  for(const r of rings){
-    const s=worldToScreen(r.x,r.y);
-    ctx.globalAlpha=clamp(r.life/r.maxLife,0,1);
-    ctx.strokeStyle=r.color;ctx.shadowBlur=20;ctx.shadowColor=r.color;
-    ctx.lineWidth=5;
-    ctx.beginPath();ctx.arc(s.x,s.y,r.r,0,TAU);ctx.stroke();
-  }
-  ctx.globalAlpha=1;
+function drawTexts(){
+ for(const t of game.texts){
+  ctx.globalAlpha=clamp(t.life/t.max,0,1);
+  ctx.fillStyle=t.color;
+  ctx.font=`900 ${t.size}px Arial`;
+  ctx.textAlign="center";
+  ctx.fillText(t.text,t.x,t.y-(1-t.life/t.max)*30);
+ }
+ ctx.globalAlpha=1;
+}
 
-  for(const t of trails){
-    const A=worldToScreen(t.x1,t.y1);
-    const B=worldToScreen(t.x2,t.y2);
-    ctx.globalAlpha=clamp(t.life/t.max,0,1);
-    ctx.strokeStyle=t.color;ctx.shadowBlur=20;ctx.shadowColor=t.color;
-    ctx.lineWidth=5;
-    ctx.beginPath();ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);ctx.stroke();
-  }
-  ctx.globalAlpha=1;
+/* =========================================================
+   UPDATE PARTICLES/TEXTS
+========================================================= */
 
-  for(const t of texts){
-    const s=worldToScreen(t.x,t.y);
-    ctx.globalAlpha=clamp(t.life/t.max,0,1);
-    ctx.fillStyle=t.color;
-    ctx.font=`900 ${t.size}px Arial`;
-    ctx.textAlign="center";
-    ctx.shadowBlur=8;ctx.shadowColor="#000";
-    ctx.fillText(t.text,s.x,s.y);
-  }
-  ctx.globalAlpha=1;
+function updateEffects(dt){
+ for(let i=game.particles.length-1;i>=0;i--){
+  const p=game.particles[i];
+  p.life-=dt;
+  p.x+=p.vx*dt;
+  p.y+=p.vy*dt;
+  p.vx*=.97;p.vy*=.97;
+  if(p.life<=0)game.particles.splice(i,1);
+ }
+
+ for(let i=game.texts.length-1;i>=0;i--){
+  const t=game.texts[i];
+  t.life-=dt;
+  t.y-=18*dt;
+  if(t.life<=0)game.texts.splice(i,1);
+ }
 }
 
 /* =========================================================
    UI
 ========================================================= */
+
 function updateUI(){
-  document.getElementById("hpFill").style.width=
-    clamp(player.hp/player.maxHp*100,0,100)+"%";
-  document.getElementById("hpText").textContent=
-    `HP ${Math.ceil(player.hp)} / ${Math.ceil(player.maxHp)}`;
+ document.getElementById("lv").textContent=player.level;
+ document.getElementById("expFill").style.width=
+  `${clamp(player.exp/player.nextExp*100,0,100)}%`;
 
-  document.getElementById("expFill").style.width=
-    clamp(game.exp/game.nextExp*100,0,100)+"%";
-  document.getElementById("expText").textContent=
-    `EXP ${Math.floor(game.exp)} / ${game.nextExp}`;
+ document.getElementById("hpFill").style.width=
+  `${clamp(player.hp/player.maxHp*100,0,100)}%`;
 
-  document.getElementById("time").textContent=formatTime(game.time);
-  document.getElementById("level").textContent="LEVEL "+game.level;
-  document.getElementById("stats").textContent=
-    `KILLS ${game.kills.toLocaleString()}　COIN ${game.coins.toLocaleString()}`;
+ const sec=Math.floor(game.time);
+ const m=String(Math.floor(sec/60)).padStart(2,"0");
+ const s=String(sec%60).padStart(2,"0");
+ document.getElementById("time").textContent=`${m}:${s}`;
 
-  document.getElementById("comboNum").textContent=game.combo.toLocaleString();
+ document.getElementById("combo").innerHTML=
+  `${game.combo} <small>COMBO</small>`;
 
-  if(game.boss){
-    document.getElementById("bossFillInner").style.width=
-      clamp(game.boss.hp/game.boss.maxHp*100,0,100)+"%";
-  }
-}
+ document.getElementById("stats").innerHTML=
+  `敵 ${game.enemies.length.toLocaleString()}<br>`+
+  `撃破 ${game.kills.toLocaleString()}<br>`+
+  `COIN ${Math.floor(game.coins).toLocaleString()}<br>`+
+  `ATK ${Math.floor(player.attack)} / CRIT ${Math.floor(player.crit*100)}%`;
 
-function updateWeaponUI(){
-  const el=document.getElementById("weaponUI");
-  el.innerHTML="";
-  for(let i=0;i<6;i++){
-    const s=document.createElement("div");
-    s.className="slot"+(weapons[i]?" active":"");
-    if(weapons[i]){
-      const w=weapons[i];
-      const d=weaponDefs[w.id];
-      const evo=w.evolved?evolutions[w.id]:null;
-      s.innerHTML=`
-        <div class="icon">${evo?evo.icon:d.icon}</div>
-        <div class="name">${evo?evo.name:d.name}</div>
-        <div class="lv">Lv.${w.level}</div>
-      `;
-    }
-    el.appendChild(s);
-  }
-}
+ const ws=document.getElementById("weaponSlots");
+ ws.innerHTML="";
+ for(let i=0;i<6;i++){
+  const el=document.createElement("div");
+  el.className="slot";
+  if(player.weapons[i]){
+   const w=player.weapons[i];
+   el.innerHTML=`${w.icon}<em>W</em><b>Lv.${w.level}</b>`;
+  }else el.innerHTML=`<span style="opacity:.2">＋</span>`;
+  ws.appendChild(el);
+ }
 
-function updatePassiveUI(){
-  const el=document.getElementById("passiveUI");
-  el.innerHTML="";
-  for(let i=0;i<6;i++){
-    const s=document.createElement("div");
-    s.className="pSlot";
-    if(passives[i]){
-      const p=passives[i];
-      s.innerHTML=`
-        <div class="pIcon">${passiveDefs[p.id].icon}</div>
-        <div class="pLv">Lv.${p.level}</div>
-      `;
-    }
-    el.appendChild(s);
-  }
+ const ps=document.getElementById("passiveSlots");
+ ps.innerHTML="";
+ for(let i=0;i<6;i++){
+  const el=document.createElement("div");
+  el.className="slot";
+  if(player.passives[i]){
+   const p=player.passives[i];
+   el.innerHTML=`${p.icon}<em>P</em><b>Lv.${p.level}</b>`;
+  }else el.innerHTML=`<span style="opacity:.2">＋</span>`;
+  ps.appendChild(el);
+ }
 }
 
 /* =========================================================
-   ANNOUNCEMENT
+   COMBO
 ========================================================= */
-let announceTimer=null;
-function announce(main,sub=""){
-  const a=document.getElementById("announce");
-  const b=document.getElementById("subAnnounce");
-  a.textContent=main;
-  b.textContent=sub;
-  a.classList.remove("show");
-  void a.offsetWidth;
-  a.classList.add("show");
-  b.style.opacity=1;
-  clearTimeout(announceTimer);
-  announceTimer=setTimeout(()=>{
-    a.classList.remove("show");
-    b.style.opacity=0;
-  },1800);
+
+function updateCombo(dt){
+ if(game.comboTimer>0){
+  game.comboTimer-=dt;
+ }else{
+  game.combo=Math.max(0,game.combo-Math.ceil(dt*4));
+ }
 }
 
 /* =========================================================
-   CLEANUP / PERFORMANCE
+   CHEST CHECK
 ========================================================= */
-function optimizeArrays(){
-  if(particles.length>1000)particles.splice(0,particles.length-1000);
-  if(attacks.length>600)attacks.splice(0,attacks.length-600);
-  if(texts.length>100)texts.splice(0,texts.length-100);
+
+function updateChest(){
+ if(!game.chest||game.chest.opened)return;
+
+ const d=Math.hypot(player.x-game.chest.x,player.y-game.chest.y);
+
+ if(d<80){
+  document.getElementById("chest").style.display="flex";
+  document.getElementById("chestText").textContent=
+   player.weapons.some(w=>w.level>=10&&!w.evolution&&
+   player.passives.some(p=>p.id===w.passive&&p.level>=10))
+   ?"進化可能な武器があります！":
+   "経験値とコインが入っている！";
+  game.paused=true;
+ }
+}
+
+/* =========================================================
+   STAGE
+========================================================= */
+
+function checkStage(){
+ if(game.time>=900){
+  game.running=false;
+  game.paused=true;
+
+  document.getElementById("resultTitle").textContent="STAGE CLEAR!";
+  document.getElementById("resultText").innerHTML=
+   `15分間生存成功！<br>`+
+   `撃破数 ${game.kills.toLocaleString()}<br>`+
+   `最大コンボ ${game.combo}<br>`+
+   `LEVEL ${player.level}`;
+
+  document.getElementById("gameover").style.display="flex";
+ }
 }
 
 /* =========================================================
    MAIN LOOP
 ========================================================= */
-let last=0;
+
+function update(dt){
+ if(!game.running||game.paused)return;
+
+ game.time+=dt;
+
+ updatePlayer(dt);
+ updateSpawning(dt);
+ updateWeapons(dt);
+ updateEnemies(dt);
+ updateAttacks(dt);
+ updateGems(dt);
+ updateEffects(dt);
+ updateCombo(dt);
+ updateChest();
+
+ if(player.hp<=0){
+  player.hp=0;
+  game.running=false;
+  game.paused=true;
+  document.getElementById("resultTitle").textContent="GAME OVER";
+  document.getElementById("resultText").innerHTML=
+   `生存時間 ${Math.floor(game.time/60)}:${String(Math.floor(game.time%60)).padStart(2,"0")}<br>`+
+   `撃破数 ${game.kills.toLocaleString()}<br>`+
+   `LEVEL ${player.level}`;
+  document.getElementById("gameover").style.display="flex";
+ }
+
+ checkStage();
+ updateUI();
+}
+
+function draw(){
+ ctx.save();
+
+ if(game.screenShake>0){
+  ctx.translate(rand(-game.screenShake,game.screenShake),
+                rand(-game.screenShake,game.screenShake));
+  game.screenShake*=.88;
+ }
+
+ drawBackground();
+ drawGems();
+ drawEnemies();
+ drawAttacks();
+ drawPlayer();
+ drawParticles();
+ drawTexts();
+
+ ctx.restore();
+}
 
 function loop(now){
-  requestAnimationFrame(loop);
+ const dt=Math.min(.05,(now-game.last)/1000);
+ game.last=now;
 
-  if(!game.started){
-    drawIdle();
-    return;
-  }
+ update(dt);
+ draw();
 
-  const raw=Math.min(.033,(now-last)/1000||0);
-  last=now;
-
-  if(game.paused||game.over||game.cleared){
-    render();
-    return;
-  }
-
-  const dt=raw;
-
-  game.time+=dt;
-
-  if(game.time>=900){
-    clearGame();
-    render();
-    return;
-  }
-
-  game.comboTimer-=dt;
-  if(game.comboTimer<=0)game.combo=0;
-
-  updatePlayer(dt);
-  updateCamera(dt);
-  updateSpawning(dt);
-  updateWeapons(dt);
-  updateAttacks(dt);
-  updateEnemies(dt);
-  updateDrops(dt);
-  updateChests();
-  updateParticles(dt);
-
-  if(player.hp<=0){
-    gameOver();
-  }
-
-  if(game.shake>0)game.shake*=Math.pow(.02,dt);
-  optimizeArrays();
-
-  updateUI();
-  render();
+ requestAnimationFrame(loop);
 }
 
-function render(){
-  ctx.save();
-
-  if(game.shake>0){
-    ctx.translate(rand(-game.shake,game.shake),rand(-game.shake,game.shake));
-  }
-
-  drawWorld();
-  drawDrops();
-  drawEnemies();
-  drawAttacks();
-  drawParticles();
-  drawPlayer();
-
-  ctx.restore();
-}
-
-function drawIdle(){
-  ctx.fillStyle="#050713";
-  ctx.fillRect(0,0,W,H);
-}
-
-/* =========================================================
-   START / END
-========================================================= */
-function startGame(){
-  document.getElementById("start").style.display="none";
-  game.started=true;
-
-  /* 初期武器は本当に1つだけ */
-  weapons=[];
-  passives=[];
-
-  addWeapon("starBlade");
-
-  player.x=0;
-  player.y=0;
-  player.hp=player.maxHp;
-
-  updateWeaponUI();
-  updatePassiveUI();
-  announce("SURVIVE!","15:00");
-  last=performance.now();
-}
-
-function gameOver(){
-  if(game.over)return;
-  game.over=true;
-  document.getElementById("overStats").innerHTML=
-    `生存時間：${formatTime(game.time)}<br>
-     LEVEL：${game.level}<br>
-     KILLS：${game.kills.toLocaleString()}<br>
-     MAX COMBO：${game.maxCombo.toLocaleString()}<br>
-     COIN：${game.coins.toLocaleString()}`;
-  document.getElementById("gameOver").style.display="flex";
-}
-
-function clearGame(){
-  if(game.cleared)return;
-  game.cleared=true;
-  document.getElementById("clearStats").innerHTML=
-    `生存時間：15:00<br>
-     LEVEL：${game.level}<br>
-     KILLS：${game.kills.toLocaleString()}<br>
-     MAX COMBO：${game.maxCombo.toLocaleString()}<br>
-     COIN：${game.coins.toLocaleString()}`;
-  document.getElementById("clear").style.display="flex";
-  announce("STAGE CLEAR!","15 MINUTES SURVIVED");
-}
-
-/* =========================================================
-   INITIALIZATION
-========================================================= */
-updateWeaponUI();
-updatePassiveUI();
+recalcStats();
+updateUI();
 requestAnimationFrame(loop);
 
-/*
-=========================================================
-  GAME DESIGN NOTES
-=========================================================
+/* =========================================================
+   DEMO EVENTS
+========================================================= */
 
-・最初の武器は「星刃」1個だけ。
-・EXPを集めると必ずレベルアップする。
-・レベルアップ時はゲームを停止して3択。
-・新武器を6個まで取得可能。
-・同じ武器はレベルアップで強化。
-・パッシブも6枠まで。
-・武器Lv10 + 対応パッシブLv10で進化可能。
-・進化はボスが落とす宝箱から発生。
-・ボス1体につき宝箱1個。
-・15分生存でステージクリア。
-・矢印キーのみで移動。
-・攻撃は完全自動。
-・各武器は単なる三角形回転ではなく、
-  「予告 → 発動 → 爆発/斬撃 → 残留」のような
-  個別の攻撃モーションを持つ。
-・30種類以上の武器を用意。
-・通常武器と進化武器で攻撃パターンが変化。
-=========================================================
+setInterval(()=>{
+ if(!game.running||game.paused)return;
+
+ if(game.time>120&&Math.random()<.15){
+  flashMessage("MASS ASSAULT","#ff6b8a");
+  for(let i=0;i<40;i++)spawnEnemy(false);
+ }
+
+ if(game.time>360&&Math.random()<.12){
+  flashMessage("EXP FEVER","#65edff");
+  for(let i=0;i<15;i++){
+   game.gems.push({
+    x:player.x+rand(-300,300),
+    y:player.y+rand(-250,250),
+    r:4,value:3,vx:0,vy:0
+   });
+  }
+ }
+
+ if(game.time>660&&Math.random()<.1){
+  flashMessage("COIN FEVER","#ffe36a");
+  game.coins+=300;
+ }
+
+ if(game.time>840&&Math.random()<.15){
+  flashMessage("FINAL WAVE","#ff5275");
+  for(let i=0;i<70;i++)spawnEnemy(false);
+ }
+},3000);
+
+/*
+===========================================================
+ 重要仕様
+
+ 武器:
+  ・最大6枠
+  ・同じ武器を選択するとLv+1
+  ・Lv10まで
+  ・6枠埋まったら新規武器は候補に出ない
+  ・所持武器Lv10なら通常候補から除外
+
+ 道具:
+  ・最大6枠
+  ・同じ道具を選択するとLv+1
+  ・Lv10まで
+  ・6枠埋まったら新規道具は候補に出ない
+  ・所持道具Lv10なら通常候補から除外
+
+ つまり、
+  「武器6/6・道具6/6」
+  ↓
+  レベルアップ
+  ↓
+  既に持っている武器・道具のLvUPのみ
+  ↓
+  新しい武器・道具は一切出ない
+
+ さらに、
+  武器Lv10 + 対応道具Lv10
+  ↓
+  ボス宝箱
+  ↓
+  進化
+
+===========================================================
 */
 </script>
 </body>
